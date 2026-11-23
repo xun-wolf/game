@@ -5,7 +5,7 @@
 > 参考：[Cardwork Cycle](https://honey-pony.itch.io/cardwork-cycle) by HoneyPony
 > 平台：浏览器 HTML5 / PC 桌面端
 > 单局时长：15–30 分钟
-> 引擎：Godot 4.x
+> 引擎：Godot 3.5.3
 
 ---
 
@@ -338,7 +338,7 @@ flowchart LR
 
 | 项目 | 方案 |
 |------|------|
-| 引擎 | Godot 4.x |
+| 引擎 | Godot 3.5.3 |
 | 语言 | GDScript |
 | 导出 | HTML5（浏览器） + Windows 桌面 |
 | 数据 | 卡牌/作物/天气数据用 JSON 配置 |

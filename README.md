@@ -1,32 +1,51 @@
-# 🌾 《田间风云》（Field Chronicles）项目目录说明
+# 🌾 《田间风云》（Field Chronicles）
 
-本项目借鉴了 itch.io 知名独立卡牌种田游戏 **[Cardwork Cycle](https://honey-pony.itch.io/cardwork-cycle)** 的核心玩法机制，专为展现农业劳作艰辛、天灾人祸与农耕智慧而设计的轻量卡牌策略小游戏。
+卡牌驱动 × 种田经营的轻量策略小游戏。借鉴 itch.io 独立游戏 **[Cardwork Cycle](https://honey-pony.itch.io/cardwork-cycle)** 的核心玩法，把重心放在"体验真实种地的艰辛"：虫害、旱情、体力极限与岁赋压力。
 
----
-
-## 📁 本地文件清单
-
-当前文件夹 `d:\aigame` 已完整保存了本项目的全套策划文档、交互式演示 Demo 和数学平衡测试脚本：
-
-| 文件名 | 类型 | 说明 | 使用方式 |
-| :--- | :--- | :--- | :--- |
-| **[`demo.html`](file:///d:/aigame/demo.html)** | 🎮 游戏 Demo | 完整可交互的前端 HTML5 游戏原型，包含三档难度、16回合循环、卡牌种田、自留种与死因诊断报告。 | 直接双击在任何浏览器（Chrome/Edge等）中即可开玩 |
-| **[`game-design-document.md`](file:///d:/aigame/game-design-document.md)** | 📄 策划文档 (GDD) | v2.2 完整游戏设计文档（约两万字），包含核心循环、卡牌/作物/天气表、四重障碍体系、无实体NPC旁白、年度结算与死因诊断。 | 用任意 Markdown 编辑器或 VS Code 打开阅读 |
-| **[`simulate_game.py`](file:///d:/aigame/simulate_game.py)** | 🧪 平衡性测试 | 200 局自动化模拟脚本，用于测算悠闲/普通/困难三档模式的产出、税金和真实通关率。 | 命令行执行：`python simulate_game.py` |
+- 单局 = 二十四候一年：四季各 6 候（春耕 / 夏耘 / 秋收 / 冬藏），大寒结束完税
+- 五档官品：九品·丰年祥和 → 一品·神农绝境（岁赋 18 / 24 / 24 / 24 / 30 两）
+- 田垄种植 + 害虫侵袭：用攻击 / 防御 / 水系卡牌护苗，每候体力 3 点、摸 5 张牌
+- 收获二选一：挑粮入市换存银，或选优留种收卡牌
+- 种成【百年月华·金稻】即触发传奇胜利
 
 ---
 
-## 🕹️ 核心游戏特性一览
+## 仓库结构
 
-1. **单局短平快（16 回合，约 15 分钟）**：
-   * 🌸 春季（6 回合）：育苗培土，平稳起步
-   * ☀️ 夏季（6 回合）：伏旱蚜虫，考验取舍
-   * 🍂 秋季（4 回合）：抢收变现，秋末完税
-2. **三档难度体系**：
-   * 🌿 悠闲模式（税金 8🪙，通关率 ~97%，轻度科普）
-   * ⚖️ 普通模式（税金 12🪙，通关率 ~57%，标准策略）
-   * 🔥 困难模式（税金 16🪙，通关率 ~20%，硬核求存）
-3. **自留种双轨循环**：
-   * 收获时二选一：【💰 变现缴税】或【🌾 选优留种扩产】，摆脱无种可用的死循环。
-4. **年终死因精准诊断**：
-   * 失败不留遗憾，系统根据对局记录直击核心败因：【大旱绝收】、【虫灾失控】、【谷贱伤农】或【力不从心】。
+| 路径 | 说明 |
+| :--- | :--- |
+| [`GameIame/`](GameIame/) | Godot 3.5.3 游戏工程（GDScript，主场景 `MainMenu.tscn`，分辨率 1080×800） |
+| [`demo.html`](demo.html) | 独立 HTML5 可玩原型，规则与工程对齐：24 候、5 官品、虫害护苗、收获二选一 |
+| [`game-design-document.md`](game-design-document.md) | v2.2 策划文档（早期设计：16 回合、三档难度），部分数值已被工程迭代覆盖，实际以 `GameIame/` 为准 |
+| [`simulate_game.py`](simulate_game.py) | 早期三难度、16 回合的平衡模拟脚本，用于验证旧经济模型，尚未跟随工程迭代 |
+| [`_tools/`](_tools/) | Python 工具脚本：资源生成（贴图/音效）、场景批量修改、数值扫描 |
+| `Bin/` | 本地导出的 Windows 包与 `.pck`（构建产物，未纳入版本库） |
+
+`GameIame/` 内部按领域分目录：`cards` 卡牌、`farm` 田地、`plants` 作物、`bugs` 虫害、`seasons` 季节表现、`energy` 体力、`shop` 商店、`ui` 界面、`tutorial` 引导、`sfx`/`music` 音频，`_devtest` 为自动测试场景。
+
+## 运行方式
+
+**1. 运行 Godot 游戏**
+
+用 [Godot 3.5.3](https://godotengine.org/download/3.x/) 打开 `GameIame/project.godot`；Windows 下也可直接双击 `GameIame/运行游戏.bat`（脚本内写有本机引擎路径，换机器需自行修改）。
+
+**2. 玩 HTML 原型**
+
+双击 [`demo.html`](demo.html)，用 Chrome / Edge 等浏览器打开即可。
+
+**3. 跑平衡模拟**
+
+```bash
+python simulate_game.py
+```
+
+## 技术信息
+
+| 项目 | 内容 |
+| :--- | :--- |
+| 引擎 | Godot 3.5.3（GLES2） |
+| 语言 | GDScript |
+| 导出 | HTML5 / Windows Desktop（见 `GameIame/export_presets.cfg`） |
+| 架构 | 事件/状态脚本以 Autoload 常驻：`SeasonManager`、`DifficultyManager`、`GS`、`CardCreation`、`TutorialSteps`、`Flags` 等 |
+
+仓库忽略项（见 [`.gitignore`](.gitignore)）：`Bin/` 导出产物、`GameIame/.import/` 缓存、`*.aup3` 音频工程源文件、`_archive/`、`_shots/`、Python 缓存与日志。

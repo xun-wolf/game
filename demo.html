@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>田间风云 (Cardwork Cycle 纯正风格版) - 单文件免安装版</title>
+  <title>田间风云 · 二十四候（规则对齐版）</title>
   <style>
     /* 100% 内嵌纯 CSS，零外链、零依赖、断网即可秒开 */
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-    
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
       min-height: 100vh;
@@ -47,7 +47,7 @@
       background-position: 0 0, 30px 30px;
     }
 
-    /* 散落在空地周围的野石杂草 (Cardwork Cycle 元素) */
+    /* 散落在空地周围的野石杂草 */
     .field-pebble {
       position: fixed;
       background: #3c2a1c;
@@ -125,7 +125,7 @@
     }
     .btn-link:hover { background: #4a331d; }
 
-    /* 古卷轴叙事栏 (Cardwork Cycle scroll.svg 风格) */
+    /* 古卷轴叙事栏 */
     .narrator-scroll {
       background: #fbf6e8;
       color: #3b2818;
@@ -156,8 +156,13 @@
       font-size: 12px;
       white-space: nowrap;
     }
+    .weather-pill.drought {
+      background: #fef2f2;
+      color: #b91c1c;
+      border-color: #f87171;
+    }
 
-    /* 中央农田区 (沃土耕地托盘) */
+    /* 中央农田区 */
     .farm-enclosure {
       background: #362415;
       border: 5px solid #201309;
@@ -175,7 +180,7 @@
       font-weight: 800;
     }
 
-    /* 6 块泥土圆斑地块 (Cardwork Cycle plant_spot 形式) */
+    /* 6 块泥土圆斑地块 */
     .field-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -185,7 +190,6 @@
       .field-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
-    /* plant_spot 泥土圆斑样式 */
     .plant-spot {
       background: radial-gradient(circle at 50% 50%, #7d6549 0%, #644d32 70%, #4a3620 100%);
       border: 3px solid #3c2a17;
@@ -292,10 +296,11 @@
       animation: blinkPest 0.7s infinite alternate;
     }
     @keyframes blinkPest { 0% { opacity: 0.7; } 100% { opacity: 1; } }
-    .tag-weed { background: #d97706; color: #fff; font-weight: 900; padding: 1px 6px; border-radius: 4px; }
-    .tag-fert { background: #7c3aed; color: #fff; font-weight: 900; padding: 1px 6px; border-radius: 4px; }
+    .tag-def { background: #2563eb; color: #fff; font-weight: 900; padding: 1px 6px; border-radius: 4px; }
+    .tag-hp { background: #16a34a; color: #fff; font-weight: 900; padding: 1px 6px; border-radius: 4px; }
+    .tag-hp.low { background: #b91c1c; }
 
-    /* 底部 HUD：能量球 + 手牌 + 结束回合按钮 (Cardwork Cycle 布局) */
+    /* 底部 HUD：能量球 + 手牌 + 结束回合按钮 */
     .bottom-hud {
       background: #1c150f;
       border-radius: 16px;
@@ -307,7 +312,7 @@
       box-shadow: 0 10px 20px rgba(0,0,0,0.4);
     }
 
-    /* 能量球 (Energy Orb) */
+    /* 能量球 */
     .energy-orb {
       flex: 0 0 90px;
       height: 90px;
@@ -336,7 +341,7 @@
       padding: 12px 4px 4px 4px;
     }
 
-    /* 单张卡牌 (Cardwork Cycle card_seeds.svg / card_water.svg 形式) */
+    /* 单张卡牌 */
     .card-item {
       flex: 0 0 142px;
       height: 180px;
@@ -362,14 +367,14 @@
       z-index: 30;
     }
 
-    /* 卡牌分类纯正色板 */
+    /* 卡牌分类色板 */
     .card-seed { background: #735d3d; border: 3px solid #482b0a; border-bottom: 5px solid #2e1a05; }
     .card-water { background: #4a708b; border: 3px solid #233a4c; border-bottom: 5px solid #142431; }
-    .card-fert { background: #7c5295; border: 3px solid #4c2266; border-bottom: 5px solid #301342; }
-    .card-clean { background: #8b4a4a; border: 3px solid #5a1e1e; border-bottom: 5px solid #3c1212; }
-    .card-reap { background: #b47828; border: 3px solid #6e430c; border-bottom: 5px solid #472905; }
+    .card-atk { background: #8b4a4a; border: 3px solid #5a1e1e; border-bottom: 5px solid #3c1212; }
+    .card-def { background: #4a5b8b; border: 3px solid #1e2a5a; border-bottom: 5px solid #12183c; }
+    .card-util { background: #7c5295; border: 3px solid #4c2266; border-bottom: 5px solid #301342; }
 
-    /* 卡牌顶栏 (标题在左，费用在右) */
+    /* 卡牌顶栏 */
     .card-top-bar {
       display: flex;
       justify-content: space-between;
@@ -503,7 +508,7 @@
 </head>
 <body class="season-spring">
 
-  <!-- 空地外围野石 (Cardwork Cycle 氛围) -->
+  <!-- 空地外围野石 -->
   <div class="field-pebble" style="width: 28px; height: 18px; top: 120px; left: 6%;"></div>
   <div class="field-pebble" style="width: 36px; height: 24px; top: 320px; right: 5%;"></div>
   <div class="field-pebble" style="width: 22px; height: 16px; bottom: 80px; left: 8%;"></div>
@@ -514,50 +519,47 @@
     <div class="header-bar">
       <div class="game-title">
         <span>🌾 田间风云</span>
-        <span id="season-badge" class="season-badge">🌸 春生时节·第 1/16 回合</span>
+        <span id="season-badge" class="season-badge">🌸 春耕 · 第 1/24 候 · 立春</span>
       </div>
       <div style="display:flex; align-items:center; gap:16px;">
-        <span style="font-size:14px; color:#ffd166; font-weight:bold;">🪙 存银: <span id="ui-gold">4</span></span>
-        <span style="font-size:14px; color:#fb7185; font-weight:bold;">🎯 赋税: <span id="ui-tax">12</span>🪙</span>
-        <select id="diff-select" onchange="changeDifficulty()">
-          <option value="easy">🌿 悠闲模式 (税金 8🪙)</option>
-          <option value="normal" selected>⚖️ 普通模式 (税金 12🪙)</option>
-          <option value="hard">🔥 困难模式 (税金 16🪙)</option>
+        <span style="font-size:14px; color:#ffd166; font-weight:bold;">🪙 存银: <span id="ui-gold">0</span></span>
+        <span style="font-size:14px; color:#fb7185; font-weight:bold;">🎯 岁赋: <span id="ui-tax">18</span> 两</span>
+        <select id="tier-select" onchange="changeTier()">
+          <option value="t1" selected>九品 · 丰年祥和（岁赋 18 两）</option>
+          <option value="t2">七品 · 苛捐杂税（岁赋 24 两）</option>
+          <option value="t3">五品 · 凶虫肆虐（岁赋 24 两 · 双虫）</option>
+          <option value="t4">三品 · 百年大旱（岁赋 24 两 · 虫 + 大暑旱）</option>
+          <option value="t5">一品 · 神农绝境（岁赋 30 两 · 虫 + 旱 · 接济 6 两）</option>
         </select>
         <button onclick="initGame()" class="btn-link">重开新局</button>
       </div>
     </div>
 
-    <!-- 古卷轴叙事栏 (scroll.svg 形式) -->
+    <!-- 古卷轴叙事栏 -->
     <div class="narrator-scroll">
       <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
-        <span style="font-weight:900; color:#854d0e; white-space:nowrap;">👴 老农夫:</span>
-        <span id="ui-narrator" class="narrator-text">“一年之计在于春，先在下方点选种子卡，播在泥土圆垄上吧！”</span>
+        <span style="font-weight:900; color:#854d0e; white-space:nowrap;">📜 农事:</span>
+        <span id="ui-narrator" class="narrator-text">“一年之计在于春。先在下方点选种子卡，播在泥土圆垄上吧！”</span>
       </div>
-      <div id="ui-weather" class="weather-pill">🌤️ 今日细雨</div>
+      <div id="ui-term" class="weather-pill">节气：立春 · 春耕</div>
     </div>
 
-    <!-- 农庄耕地托盘与泥土方格 (plant_spot 形式) -->
+    <!-- 农庄耕地托盘 -->
     <div class="farm-enclosure">
       <div class="farm-header">
-        <span>🌱 【农庄耕作区 - 沃土六垄】(点击手牌后点击泥垄耕作；作物成熟点击收割)</span>
-        <span id="turn-overview-lbl">春季多雨·适宜下种</span>
+        <span>🌱 【农庄耕作区 · 沃土六垄】(点手牌再点泥垄；作物成熟自动收割)</span>
+        <span id="turn-overview-lbl">春耕 · 宜下种</span>
       </div>
       <div id="field-grid" class="field-grid"></div>
     </div>
 
-    <!-- 底部 HUD (能量球 + 卡牌阵列 + 结束回合) -->
+    <!-- 底部 HUD -->
     <div class="bottom-hud">
-      <!-- 能量球 (Energy Orb) -->
       <div class="energy-orb">
         <div id="ui-energy-val" class="energy-val">3/3</div>
         <div class="energy-lbl">⚡体力</div>
       </div>
-
-      <!-- 手牌阵列 (Cardwork Cycle 形式) -->
       <div id="hand-container" class="cards-row"></div>
-
-      <!-- 结束回合按钮 -->
       <button onclick="endTurn()" class="btn-end-turn">
         <span>🔔 结束</span>
         <span>今日劳作</span>
@@ -569,48 +571,48 @@
       <div>🎴 抽牌堆: <span id="deck-count">0</span> | 🗑️ 弃牌堆: <span id="discard-count">0</span></div>
     </div>
 
-    <!-- 收割弹窗 (自留良种机制) -->
+    <!-- 收割弹窗（选优留种 / 挑粮入市） -->
     <div id="harvest-modal" class="modal-overlay hidden">
       <div class="modal-card">
         <div style="font-size:48px;" id="harvest-icon">🥬</div>
         <div>
-          <h3 style="font-size:19px; font-weight:900; color:#451a03;" id="harvest-title">大白菜丰收熟透！</h3>
-          <p style="font-size:13px; color:#78716c; margin-top:6px;">请决定这批作物的去处：</p>
+          <h3 style="font-size:19px; font-weight:900; color:#451a03;" id="harvest-title">小白菜 长成！</h3>
+          <p style="font-size:13px; color:#78716c; margin-top:6px;">【选优留种】收一张卡牌入牌组，或【挑粮入市】换存银：</p>
         </div>
         <div style="display:flex; flex-direction:column; gap:10px;">
           <button onclick="resolveHarvest('sell')" class="btn-choice btn-sell">
-            <span>🪙 运往集市换钱</span>
-            <span id="harvest-sell-val" style="background:rgba(0,0,0,0.25); padding:2px 8px; border-radius:6px; font-size:12px;">+3 🪙</span>
+            <span>🪙 挑粮入市</span>
+            <span id="harvest-sell-val" style="background:rgba(0,0,0,0.25); padding:2px 8px; border-radius:6px; font-size:12px;">+3 两</span>
           </button>
           <button onclick="resolveHarvest('seed')" class="btn-choice btn-seed">
-            <span>🌱 选优穗留作良种</span>
-            <span style="background:rgba(0,0,0,0.25); padding:2px 8px; border-radius:6px; font-size:12px;">+1 优质种子卡入牌库</span>
+            <span>🌱 选优留种</span>
+            <span id="harvest-seed-val" style="background:rgba(0,0,0,0.25); padding:2px 8px; border-radius:6px; font-size:12px;">+1 卡牌入牌组</span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- 年终结算与归因诊断弹窗 -->
+    <!-- 年终结算弹窗 -->
     <div id="settlement-modal" class="modal-overlay hidden">
       <div class="modal-card" style="max-width:440px;">
         <div id="settle-badge" style="font-size:48px;">🏆</div>
         <div>
           <h2 id="settle-title" style="font-size:20px; font-weight:900;">岁末年终结算</h2>
-          <div id="settle-subtitle" style="font-size:12px; color:#78716c; margin-top:4px;">16 回合四季轮转终了</div>
+          <div id="settle-subtitle" style="font-size:12px; color:#78716c; margin-top:4px;">二十四候周天已毕 · 大寒结算</div>
         </div>
 
         <div style="background:#fef3c7; border:2px solid #fde68a; border-radius:12px; padding:14px; font-size:13px; text-align:left; display:flex; flex-direction:column; gap:6px;">
-          <div style="display:flex; justify-content:space-between;"><span style="color:#78716c;">年终总积蓄:</span><span id="settle-gold" style="font-weight:bold;">14 🪙</span></div>
-          <div style="display:flex; justify-content:space-between;"><span style="color:#78716c;">官府应征税赋:</span><span id="settle-tax" style="font-weight:bold; color:#dc2626;">12 🪙</span></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:#78716c;">年终总存银:</span><span id="settle-gold" style="font-weight:bold;">0 两</span></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:#78716c;">官府应征岁赋:</span><span id="settle-tax" style="font-weight:bold; color:#dc2626;">18 两</span></div>
           <div style="border-top:1px dashed #d97706; padding-top:6px; display:flex; justify-content:space-between; font-weight:900; font-size:14px;">
             <span>结余差额:</span>
-            <span id="settle-balance" style="color:#059669;">+2 🪙</span>
+            <span id="settle-balance" style="color:#059669;">+0 两</span>
           </div>
         </div>
 
         <div id="settle-diagnosis" class="diag-box">
-          <div id="diag-title" style="font-weight:900; margin-bottom:4px;">🛑 【败因诊断：大旱绝收】</div>
-          <p id="diag-desc">连日干旱耗尽了井水，你无力维持庄稼生长，最终颗粒无收。</p>
+          <div id="diag-title" style="font-weight:900; margin-bottom:4px;">【年终结算】</div>
+          <p id="diag-desc">二十四候周天已毕，知县登门核验本年岁赋。</p>
         </div>
 
         <p style="font-size:12px; font-style:italic; color:#78350f; background:#fffbeb; padding:8px; border-radius:8px;">
@@ -623,76 +625,127 @@
   </div>
 
   <script>
+    /* ---------- 作物：与工程一致（小白菜/红番茄/紫葡萄/金稻） ---------- */
+    // grow = 成熟所需浇水次数（对应工程 3/5/5/8 帧）；hp/防御沿用工程生命值
     const CROPS = {
-      cabbage: { name: "白菜", icon: "🥬", maxGrowth: 2, waterNeed: 1, sell: 3 },
-      rice:    { name: "水稻", icon: "🌾", maxGrowth: 3, waterNeed: 2, sell: 5 },
-      tomato:  { name: "番茄", icon: "🍅", maxGrowth: 4, waterNeed: 1, sell: 9 },
-      corn:    { name: "玉米", icon: "🌽", maxGrowth: 3, waterNeed: 1, sell: 6 }
+      cabbage:  { name: "小白菜", icon: "🥬", grow: 3, hp: 7, level: 1, gold: 3 },
+      tomato:   { name: "红番茄", icon: "🍅", grow: 5, hp: 5, level: 2, gold: 6 },
+      grape:    { name: "紫葡萄", icon: "🍇", grow: 5, hp: 5, level: 3, gold: 15 },
+      goldrice: { name: "金稻",   icon: "🌾", grow: 8, hp: 4, level: 4, gold: 0 }
     };
 
-    const DIFFICULTIES = {
-      easy:   { name: "🌿 悠闲", maxStamina: 4, gold: 8,  tax: 8,  draw: 6, rotGrace: 3, crashProb: 0.1 },
-      normal: { name: "⚖️ 普通", maxStamina: 3, gold: 4,  tax: 12, draw: 5, rotGrace: 2, crashProb: 0.35 },
-      hard:   { name: "🔥 困难", maxStamina: 2, gold: 0,  tax: 16, draw: 4, rotGrace: 1, crashProb: 0.6 }
+    /* ---------- 五档官品：税金 / 开局虫害 / 大旱 / 乡邻接济 完全对齐工程 ---------- */
+    const TIERS = {
+      t1: { rank: "九品", name: "丰年祥和", tax: 18, gold: 0, bugs: 0, drought: false,
+            desc: "害虫温和，风调雨顺", praise: "岁丰年稔，草木茂盛，深谙田园农道！" },
+      t2: { rank: "七品", name: "苛捐杂税", tax: 24, gold: 0, bugs: 0, drought: false,
+            desc: "官吏苛征，一候一两银", praise: "苛赋沉重，仍能精打细算、如数完税，功昭乡梓！" },
+      t3: { rank: "五品", name: "凶虫肆虐", tax: 24, gold: 0, bugs: 2, drought: false,
+            desc: "凶虫横行，开局即有双虫袭扰", praise: "力斩群害，守土护稼，堪称田垄中流砥柱！" },
+      t4: { rank: "三品", name: "百年大旱", tax: 24, gold: 0, bugs: 2, drought: true,
+            desc: "凶虫袭扰 + 大旱：大暑前后（第 10-12 候）每阶段 2 点水", praise: "抗旱排难，善构水利，挽救田庄于绝境！" },
+      t5: { rank: "一品", name: "神农绝境", tax: 30, gold: 6, bugs: 2, drought: true,
+            desc: "苛政 + 大旱 + 凶虫；乡邻接济，开局多 6 两", praise: "绝境登神，光耀华夏，创万世不拔之基业！" }
     };
+
+    /* ---------- 二十四节气（与 SeasonManager.SOLAR_TERMS 一致） ---------- */
+    const TERMS = ["立春","雨水","惊蛰","春分","清明","谷雨","立夏","小满","芒种","夏至","小暑","大暑",
+                   "立秋","处暑","白露","秋分","寒露","霜降","立冬","小雪","大雪","冬至","小寒","大寒"];
+    const SEASON_NAMES = ["春耕", "夏耘", "秋收", "冬藏"];
+    const SEASON_ICONS = ["🌸", "☀️", "🍁", "❄️"];
+
+    /* ---------- 卡牌库：取工程中的卡名、费用与效果（简化为田垄操作） ---------- */
+    const CARDS = {
+      plant_cabbage: { name: "初耕·小白菜", type: "seed", crop: "cabbage", cost: 1, icon: "🥬", desc: "播下小白菜（浇 3 次水成熟）" },
+      plant_tomato:  { name: "田禾·红番茄", type: "seed", crop: "tomato",  cost: 2, icon: "🍅", desc: "播下红番茄（浇 5 次水成熟）" },
+      plant_grape:   { name: "精选·紫葡萄", type: "seed", crop: "grape",   cost: 3, icon: "🍇", desc: "播下紫葡萄（浇 5 次水成熟）" },
+      plant_gold:    { name: "百年月华·金稻", type: "seed", crop: "goldrice", cost: 3, icon: "🌾", desc: "传说神种，长成即获胜（8 次水）" },
+
+      dawn_dew:      { name: "晨露清沥", type: "water", amount: 1, cost: 0, icon: "💧", desc: "为 1 块田补 1 点水" },
+      water_ladle:   { name: "水瓢浅浇", type: "water", amount: 1, cost: 1, icon: "🥄", desc: "为 1 块田补 1 点水" },
+      water_bucket:  { name: "水桶重灌", type: "water", amount: 2, cost: 1, icon: "🪣", desc: "为 1 块田补 2 点水" },
+      sprinkler:     { name: "竹制喷壶", type: "waterAll", amount: 1, cost: 3, icon: "🚿", desc: "所有作物各补 1 点水" },
+      waterwheel:    { name: "龙骨水车", type: "waterAll", amount: 2, cost: 4, icon: "⚙️", desc: "所有作物各补 2 点水" },
+
+      hoe_bug:       { name: "挥锄除虫", type: "attack", cost: 1, icon: "🪓", desc: "清除 1 块田的虫害" },
+      bug_net:       { name: "细密防虫网", type: "defense", amount: 1, cost: 1, icon: "🕸️", desc: "为 1 株作物加 1 点免疫" },
+      scarecrow:     { name: "稻草扎人", type: "defense", amount: 3, cost: 1, icon: "🎋", desc: "为 1 株作物加 3 点免疫" },
+
+      ash:           { name: "草木灰肥", type: "heal", amount: 1, cost: 1, icon: "🌿", desc: "回复 1 点生命并清虫" },
+      spring:        { name: "万物回春", type: "healAll", amount: 2, cost: 4, icon: "🌸", desc: "全体回复 2 生命并清虫" },
+      almanac:       { name: "翻看黄历", type: "draw", amount: 3, cost: 1, icon: "📜", desc: "立即抽 3 张牌" },
+      tea:           { name: "粗茶提神", type: "energy", amount: 1, cost: 0, icon: "🍵", desc: "回复 1 点体力" }
+    };
+
+    /* 收获留种的卡池：等级越高，给的卡越强 */
+    const REWARD_POOL = {
+      1: ["water_ladle", "hoe_bug", "bug_net"],
+      2: ["water_bucket", "sprinkler", "scarecrow", "ash", "almanac"],
+      3: ["waterwheel", "spring", "tea", "sprinkler"]
+    };
+
+    const MAX_TURNS = 24;
+    const FIELD_COUNT = 6;
+    const START_DECK = [
+      "plant_cabbage", "dawn_dew", "bug_net", "hoe_bug", "hoe_bug",
+      "plant_tomato", "water_bucket", "water_bucket", "water_ladle", "plant_grape"
+    ];
 
     let state = {
-      diffKey: 'normal',
+      tierKey: 't1',
       turn: 1,
-      maxTurns: 16,
-      stamina: 3,
-      gold: 4,
-      water: 3,
+      energy: 3,
+      energyMax: 3,
+      gold: 0,
       fields: [],
       deck: [],
       hand: [],
       discard: [],
       selectedCardIdx: null,
       pendingHarvest: null,
-      history: { droughtCount: 0, pestIgnored: 0, rottenCount: 0, crashed: false, seedsKept: 0 }
+      harvestQueue: [],
+      pendingBugs: 0,
+      legendary: false
     };
 
+    function tier() { return TIERS[state.tierKey]; }
+
+    function makeCard(id) {
+      const def = CARDS[id];
+      return Object.assign({ id: id }, def);
+    }
+
     function initGame() {
-      const cfg = DIFFICULTIES[state.diffKey];
+      const t = tier();
       state.turn = 1;
-      state.stamina = cfg.maxStamina;
-      state.gold = cfg.gold;
-      state.water = 3;
-      state.fields = Array(6).fill(null).map(() => ({
-        crop: null, growth: 0, water: 1, status: null, matureTurns: 0, isQuality: false
+      state.energyMax = 3;
+      state.energy = 3;
+      state.gold = t.gold;
+      state.fields = Array(FIELD_COUNT).fill(null).map(() => ({
+        crop: null, growth: 0, water: 0, hp: 0, defense: 0, pest: false
       }));
 
-      state.deck = [
-        { type: "seed", cropKey: "cabbage", name: "播种·白菜", cost: 1, icon: "🥬", desc: "播种白菜 (需水1, 2回合熟)" },
-        { type: "seed", cropKey: "rice",    name: "播种·水稻", cost: 1, icon: "🌾", desc: "播种水稻 (需水2, 3回合熟)" },
-        { type: "seed", cropKey: "corn",    name: "播种·玉米", cost: 1, icon: "🌽", desc: "播种玉米 (耐旱耐风, 3回合熟)" },
-        { type: "water", name: "人工浇灌",  cost: 1, icon: "💧", desc: "为目标泥垄注入 2 滴水分" },
-        { type: "water", name: "人工浇灌",  cost: 1, icon: "💧", desc: "为目标泥垄注入 2 滴水分" },
-        { type: "water", name: "人工浇灌",  cost: 1, icon: "💧", desc: "为目标泥垄注入 2 滴水分" },
-        { type: "fert",  name: "优质农肥",  cost: 1, icon: "🧪", desc: "提升作物品质 (+2🪙卖价)" },
-        { type: "clean", name: "除草除虫",  cost: 1, icon: "🪓", desc: "清除泥垄杂草或害虫" },
-        { type: "clean", name: "除草除虫",  cost: 1, icon: "🪓", desc: "清除泥垄杂草或害虫" },
-        { type: "reap",  name: "熟透收割",  cost: 1, icon: "🫳", desc: "收割成熟作物换钱或留种" }
-      ];
+      state.deck = START_DECK.map(makeCard);
+      shuffle(state.deck);
       state.discard = [];
       state.hand = [];
       state.selectedCardIdx = null;
       state.pendingHarvest = null;
-      state.history = { droughtCount: 0, pestIgnored: 0, rottenCount: 0, crashed: false, seedsKept: 0 };
-
-      shuffle(state.deck);
-      drawCards(cfg.draw);
+      state.harvestQueue = [];
+      state.pendingBugs = t.bugs;
+      state.legendary = false;
 
       document.getElementById('settlement-modal').classList.add('hidden');
       document.getElementById('harvest-modal').classList.add('hidden');
 
-      setNarrator("“春分暖阳照大地。今年朝廷派税 " + cfg.tax + " 🪙，春播夏管秋收，切莫耽误农时！”");
+      setNarrator(`“${t.rank}·${t.name}：${t.desc}。本年岁赋 ${t.tax} 两，二十四候后完税。”`);
       updateSeasonTheme();
+      drawCards(5);
       render();
     }
 
-    function changeDifficulty() {
-      state.diffKey = document.getElementById('diff-select').value;
+    function changeTier() {
+      state.tierKey = document.getElementById('tier-select').value;
       initGame();
     }
 
@@ -707,11 +760,11 @@
       for (let i = 0; i < n; i++) {
         if (state.deck.length === 0) {
           if (state.discard.length === 0) break;
-          state.deck = [...state.discard];
+          state.deck = state.discard;
           state.discard = [];
           shuffle(state.deck);
         }
-        if (state.deck.length > 0) state.hand.push(state.deck.pop());
+        state.hand.push(state.deck.pop());
       }
     }
 
@@ -719,123 +772,165 @@
       document.getElementById('ui-narrator').innerText = text;
     }
 
+    function seasonIndexOf(turn) {
+      return Math.min(3, Math.floor((turn - 1) / 6));
+    }
+
+    // 大旱：仅三品/一品，且只在第 10-12 候提高每阶段耗水
+    function isDroughtNow() {
+      return tier().drought && state.turn >= 10 && state.turn <= 12;
+    }
+
+    function waterCostPerStage() {
+      return isDroughtNow() ? 2 : 1;
+    }
+
     function updateSeasonTheme() {
       const b = document.body;
       const badge = document.getElementById('season-badge');
       const overview = document.getElementById('turn-overview-lbl');
+      const term = document.getElementById('ui-term');
       b.classList.remove('season-spring', 'season-summer', 'season-autumn', 'season-winter');
       badge.classList.remove('season-summer-badge', 'season-autumn-badge', 'season-winter-badge');
 
-      if (state.turn <= 5) {
-        b.classList.add('season-spring');
-        badge.innerText = `🌸 春生时节·第 ${state.turn}/16 回合`;
-        overview.innerText = "春分多雨·宜抓紧播种";
-      } else if (state.turn <= 10) {
-        b.classList.add('season-summer');
-        badge.classList.add('season-summer-badge');
-        badge.innerText = `☀️ 夏长时节·第 ${state.turn}/16 回合`;
-        overview.innerText = "烈日虫生·勤浇水除虫";
-      } else if (state.turn <= 15) {
-        b.classList.add('season-autumn');
-        badge.classList.add('season-autumn-badge');
-        badge.innerText = `🍁 秋收时节·第 ${state.turn}/16 回合`;
-        overview.innerText = "金风玉露·熟透须速割";
+      const si = seasonIndexOf(state.turn);
+      const termName = TERMS[state.turn - 1] || "大寒";
+      const cls = ["season-spring", "season-summer", "season-autumn", "season-winter"][si];
+      b.classList.add(cls);
+      if (si === 1) badge.classList.add('season-summer-badge');
+      if (si === 2) badge.classList.add('season-autumn-badge');
+      if (si === 3) badge.classList.add('season-winter-badge');
+      badge.innerText = `${SEASON_ICONS[si]} ${SEASON_NAMES[si]} · 第 ${state.turn}/${MAX_TURNS} 候 · ${termName}`;
+
+      const tips = ["春耕 · 宜下种", "夏耘 · 勤浇灌", "秋收 · 抢变现", "冬藏 · 待完税"];
+      overview.innerText = tips[si];
+
+      if (isDroughtNow()) {
+        term.classList.add('drought');
+        term.innerText = `☀️ 大暑 · 旱（每阶段 2 水）`;
       } else {
-        b.classList.add('season-winter');
-        badge.classList.add('season-winter-badge');
-        badge.innerText = `❄️ 冬藏结算·第 16 回合`;
-        overview.innerText = "年关交租·核算胜败";
+        term.classList.remove('drought');
+        term.innerText = `节气：${termName} · ${SEASON_NAMES[si]}`;
       }
     }
 
     function selectCard(idx) {
+      const card = state.hand[idx];
+      // 无需选目标的即时牌
+      if (card.type === "draw" || card.type === "energy") {
+        playInstantCard(idx);
+        return;
+      }
       state.selectedCardIdx = state.selectedCardIdx === idx ? null : idx;
       render();
     }
 
+    function playInstantCard(idx) {
+      const card = state.hand[idx];
+      if (state.energy < card.cost) {
+        setNarrator("“体力透支了。结束本候劳作，明日再干吧。”");
+        return;
+      }
+      state.energy -= card.cost;
+      if (card.type === "draw") {
+        drawCards(card.amount);
+        setNarrator(`“翻开黄历，筹谋先机，又抽出 ${card.amount} 张农事牌。”`);
+      } else {
+        state.energy += card.amount;
+        setNarrator("“一碗粗茶下肚，身上又添了几分力气。”");
+      }
+      state.discard.push(state.hand.splice(idx, 1)[0]);
+      state.selectedCardIdx = null;
+      render();
+    }
+
     function applyCardToField(fieldIdx) {
+      if (state.pendingHarvest) return;
+
       const field = state.fields[fieldIdx];
+      const def = field.crop ? CROPS[field.crop] : null;
 
       if (state.selectedCardIdx === null) {
-        if (field.crop && field.growth >= CROPS[field.crop].maxGrowth) {
-          state.pendingHarvest = { fieldIdx, cropKey: field.crop, isQuality: field.isQuality };
-          showHarvestModal();
-        } else if (field.crop) {
-          const def = CROPS[field.crop];
-          setNarrator(`“第 ${fieldIdx + 1} 垄种着【${def.name}】，生长: ${field.growth}/${def.maxGrowth}，水分: ${field.water}/${def.waterNeed}。”`);
+        if (field.crop) {
+          setNarrator(`“第 ${fieldIdx + 1} 垄的${def.name}：生长 ${field.growth}/${def.grow}，水分 ${field.water}，生命 ${field.hp}/${def.hp}。”`);
         } else {
-          setNarrator(`“第 ${fieldIdx + 1} 垄泥土松软肥沃，先在下方选一张种子卡吧！”`);
+          setNarrator(`“第 ${fieldIdx + 1} 垄泥土松软肥沃，单选一张种子卡播种吧。”`);
         }
         return;
       }
 
       const card = state.hand[state.selectedCardIdx];
-      if (state.stamina < card.cost) {
-        setNarrator("“体力透支了！稍事休息结束回合，明天再战吧。”");
+      if (state.energy < card.cost) {
+        setNarrator("“体力透支了。结束本候劳作，明日再干吧。”");
         return;
       }
 
       let used = false;
+      let msg = "";
+
       if (card.type === "seed") {
-        if (field.crop !== null) {
-          setNarrator("“这块泥垄已有在生长的作物，不可胡乱播种！”");
+        if (field.crop) {
+          setNarrator("“这块田已有作物，不可胡乱播种。”");
           return;
         }
-        field.crop = card.cropKey;
+        field.crop = card.crop;
         field.growth = 0;
-        field.water = 1;
-        field.status = null;
-        field.matureTurns = 0;
-        field.isQuality = card.isQuality || false;
+        field.water = 0;
+        field.hp = CROPS[card.crop].hp;
+        field.defense = 0;
+        field.pest = false;
         used = true;
-        setNarrator(`“在第 ${fieldIdx + 1} 垄播下了【${CROPS[card.cropKey].name}】！”`);
+        msg = `“在第 ${fieldIdx + 1} 垄播下了【${CROPS[card.crop].name}】。”`;
       } else if (card.type === "water") {
-        if (field.crop === null) {
-          setNarrator("“泥垄上空空如也，浇水白白浪费了甘霖。”");
-          return;
-        }
-        field.water += 2;
-        used = true;
-        setNarrator("“注入清冽井水，庄稼叶片吸饱了水分，精神抖擞！”");
-      } else if (card.type === "fert") {
-        if (field.crop === null) {
-          setNarrator("“地里没庄稼，肥力全白费了。”");
-          return;
-        }
-        if (field.isQuality) {
-          setNarrator("“这块田垄已经施过肥了，过量施肥会烧根！”");
-          return;
-        }
-        field.isQuality = true;
-        used = true;
-        setNarrator("“施入上好优质农肥，作物品质大增，卖价提高！”");
-      } else if (card.type === "clean") {
-        if (!field.status) {
-          setNarrator("“这块田垄整洁清爽，没有杂草蚜虫，无需除治。”");
-          return;
-        }
-        field.status = null;
-        used = true;
-        setNarrator("“弯下腰细细清理，地里的蚜虫杂草总算除干净了！”");
-      } else if (card.type === "reap") {
         if (!field.crop) {
-          setNarrator("“地里空空如也，收割什么呢？”");
+          setNarrator("“空垄浇水，白白浪费了甘霖。”");
           return;
         }
-        const def = CROPS[field.crop];
-        if (field.growth < def.maxGrowth) {
-          setNarrator("“庄稼还没熟透呢，抢收折价还减产，再等等吧。”");
+        field.water += card.amount;
+        used = true;
+        msg = `“给${CROPS[field.crop].name}补了 ${card.amount} 点水。”`;
+      } else if (card.type === "waterAll") {
+        const planted = state.fields.filter(f => f.crop);
+        if (planted.length === 0) {
+          setNarrator("“田里还没庄稼，浇水无处可浇。”");
           return;
         }
-        state.pendingHarvest = { fieldIdx, cropKey: field.crop, isQuality: field.isQuality };
-        showHarvestModal();
-        return;
+        planted.forEach(f => f.water += card.amount);
+        used = true;
+        msg = `“${card.name}润遍全田，每株作物补水 ${card.amount} 点。”`;
+      } else if (card.type === "attack") {
+        if (!field.pest) {
+          setNarrator("“这块田里没有害虫，挥锄落空。”");
+          return;
+        }
+        field.pest = false;
+        used = true;
+        msg = "“一锄拍下，害虫应声而落。”";
+      } else if (card.type === "defense") {
+        if (!field.crop) {
+          setNarrator("“田里没有作物，防虫网无处可用。”");
+          return;
+        }
+        field.defense += card.amount;
+        used = true;
+        msg = `“为${CROPS[field.crop].name}施加 ${card.amount} 点免疫。”`;
+      } else if (card.type === "heal") {
+        if (!field.crop) {
+          setNarrator("“田里没有作物，无物可医。”");
+          return;
+        }
+        const maxHp = CROPS[field.crop].hp;
+        field.hp = Math.min(maxHp, field.hp + card.amount);
+        field.pest = false;
+        used = true;
+        msg = "“草木灰固本除虫，作物缓过一口气。”";
       }
 
       if (used) {
-        state.stamina -= card.cost;
+        state.energy -= card.cost;
         state.discard.push(state.hand.splice(state.selectedCardIdx, 1)[0]);
         state.selectedCardIdx = null;
+        setNarrator(msg);
         render();
       }
     }
@@ -843,11 +938,19 @@
     function showHarvestModal() {
       const p = state.pendingHarvest;
       const def = CROPS[p.cropKey];
-      const sellPrice = def.sell + (p.isQuality ? 2 : 0);
       document.getElementById('harvest-icon').innerText = def.icon;
-      document.getElementById('harvest-title').innerText = `${def.name} 饱满熟透！`;
-      document.getElementById('harvest-sell-val').innerText = `+${sellPrice} 🪙`;
+      document.getElementById('harvest-title').innerText = `${def.name} 长成！`;
+      document.getElementById('harvest-sell-val').innerText = `+${def.gold} 两`;
+      document.getElementById('harvest-seed-val').innerText = `+1 农事卡入牌组`;
       document.getElementById('harvest-modal').classList.remove('hidden');
+    }
+
+    function rollSeedReward(level) {
+      if (level === 3 && Math.random() < 0.2) {
+        return "plant_gold";
+      }
+      const pool = REWARD_POOL[Math.min(3, level)] || REWARD_POOL[1];
+      return pool[Math.floor(Math.random() * pool.length)];
     }
 
     function resolveHarvest(choice) {
@@ -856,185 +959,184 @@
       const field = state.fields[p.fieldIdx];
 
       if (choice === 'sell') {
-        const earn = def.sell + (p.isQuality ? 2 : 0);
-        state.gold += earn;
-        setNarrator(`“将满车【${def.name}】挑入市集，换得 ${earn} 🪙 现银！”`);
+        state.gold += def.gold;
+        setNarrator(`“将一车【${def.name}】挑入市集，换得 ${def.gold} 两现银。”`);
       } else {
-        state.history.seedsKept++;
-        state.deck.unshift({
-          type: "seed", cropKey: p.cropKey, name: `良种·${def.name}`, cost: 1, icon: def.icon,
-          desc: `自选优质种子 (${def.name}, 自带肥效)`, isQuality: true
-        });
-        setNarrator(`“选优穗自留作种，【良种·${def.name}】进入牌库，后顾无忧！”`);
+        const rewardId = rollSeedReward(def.level);
+        state.deck.unshift(makeCard(rewardId));
+        setNarrator(`“选优留种，【${CARDS[rewardId].name}】收入牌组。”`);
       }
 
       field.crop = null;
       field.growth = 0;
-      field.water = 1;
-      field.status = null;
-      field.matureTurns = 0;
-      field.isQuality = false;
-
-      if (state.selectedCardIdx !== null) {
-        const card = state.hand[state.selectedCardIdx];
-        state.stamina -= card.cost;
-        state.discard.push(state.hand.splice(state.selectedCardIdx, 1)[0]);
-        state.selectedCardIdx = null;
-      }
+      field.water = 0;
+      field.hp = 0;
+      field.defense = 0;
+      field.pest = false;
       state.pendingHarvest = null;
-
       document.getElementById('harvest-modal').classList.add('hidden');
+
+      if (state.harvestQueue.length > 0) {
+        state.pendingHarvest = state.harvestQueue.shift();
+        showHarvestModal();
+      }
       render();
     }
 
     function endTurn() {
+      if (state.pendingHarvest) return;
+
+      const need = waterCostPerStage();
+      const matured = [];
+
       state.fields.forEach((f, idx) => {
         if (!f.crop) return;
         const def = CROPS[f.crop];
-        if (f.status === "weed") return;
-        if (f.status === "pest") state.history.pestIgnored++;
 
-        if (f.water >= def.waterNeed) {
-          f.growth += 1;
-          f.water -= def.waterNeed;
-        } else {
-          f.growth = Math.max(0, f.growth - 0.5);
+        // 免疫每候消退 1 点
+        if (f.defense > 0) f.defense -= 1;
+
+        // 害虫啃咬：1 点伤害
+        if (f.pest) f.hp -= 1;
+
+        if (f.hp <= 0) {
+          setNarrator(`“第 ${idx + 1} 垄的${def.name}被害虫啃噬殆尽。”`);
+          f.crop = null; f.growth = 0; f.water = 0; f.hp = 0; f.defense = 0; f.pest = false;
+          return;
         }
 
-        if (f.growth >= def.maxGrowth) {
-          f.matureTurns++;
-          if (f.matureTurns > DIFFICULTIES[state.diffKey].rotGrace) {
-            f.crop = null;
-            f.growth = 0;
-            state.history.rottenCount++;
-            setNarrator(`“第 ${idx + 1} 垄的庄稼熟透烂在地里了！农事紧促，经不起拖延。”`);
+        if (f.water >= need) {
+          f.water -= need;
+          f.growth += 1;
+          if (f.growth >= def.grow) {
+            matured.push({ fieldIdx: idx, cropKey: f.crop });
+          }
+        } else {
+          f.hp -= 1;
+          if (f.hp <= 0) {
+            setNarrator(`“第 ${idx + 1} 垄缺水太久，${def.name}枯死了。”`);
+            f.crop = null; f.growth = 0; f.water = 0; f.hp = 0; f.defense = 0; f.pest = false;
           }
         }
       });
 
+      // 弃手牌、推移时令
       state.discard.push(...state.hand);
       state.hand = [];
       state.selectedCardIdx = null;
-
       state.turn++;
-      if (state.turn > state.maxTurns) {
+
+      if (state.turn > MAX_TURNS) {
         triggerSettlement();
         return;
       }
 
+      // 每 3 候来一波害虫
+      if (state.turn % 3 === 0) spawnPest();
+
+      state.energy = state.energyMax;
+      drawCards(5);
       updateSeasonTheme();
-      triggerWeather();
-      state.stamina = DIFFICULTIES[state.diffKey].maxStamina;
-      drawCards(DIFFICULTIES[state.diffKey].draw);
+
+      if (state.turn >= 10 && state.turn <= 12 && tier().drought) {
+        setNarrator("“大暑前后，日头毒辣，田里每长一阶段要多耗 1 点水。”");
+      }
+
+      // 成熟作物自动收割（金稻直接触发传奇胜利）
+      while (matured.length > 0) {
+        const h = matured.shift();
+        const def = CROPS[h.cropKey];
+        if (h.cropKey === "goldrice") {
+          state.legendary = true;
+          triggerSettlement();
+          return;
+        }
+        if (state.pendingHarvest === null) {
+          state.pendingHarvest = h;
+          showHarvestModal();
+        } else {
+          state.harvestQueue.push(h);
+        }
+      }
+
       render();
     }
 
-    function triggerWeather() {
-      const weathers = [
-        { name: "☀️ 晴朗", type: "sun" },
-        { name: "🌧️ 细雨", type: "rain" },
-        { name: "☀️ 伏旱", type: "drought" },
-        { name: "🌪️ 骤风", type: "wind" },
-        { name: "🐛 蚜虫", type: "pest" }
-      ];
-
-      const r = Math.random();
-      let w = weathers[0];
-      if (state.turn <= 5) w = r < 0.45 ? weathers[1] : (r < 0.75 ? weathers[0] : weathers[3]);
-      else if (state.turn <= 10) w = r < 0.35 ? weathers[2] : (r < 0.65 ? weathers[4] : weathers[0]);
-      else w = r < 0.5 ? weathers[0] : (r < 0.75 ? weathers[1] : weathers[3]);
-
-      document.getElementById('ui-weather').innerText = `天气: ${w.name}`;
-
-      if (w.type === "rain") {
-        state.fields.forEach(f => { if (f.crop) f.water += 1; });
-        setNarrator("“春雨连绵，全田润泽，省却了挑水之劳！”");
-      } else if (w.type === "drought") {
-        state.history.droughtCount++;
-        state.fields.forEach(f => { if (f.crop) f.water = Math.max(0, f.water - 1); });
-        setNarrator("“烈日似火，地表干裂，庄稼全在受渴抗旱！”");
-      } else if (w.type === "pest") {
-        const planted = state.fields.filter(f => f.crop && !f.status);
-        if (planted.length > 0) {
-          planted[Math.floor(Math.random() * planted.length)].status = "pest";
-          setNarrator("“叶背发现了蚜虫！若不抓紧除治，后果不堪设想。”");
+    function spawnPest() {
+      // 开局双虫：没有作物时先挂起，等播种后再一起放虫
+      if (state.pendingBugs > 0) {
+        let placed = 0;
+        while (state.pendingBugs > 0) {
+          const empty = state.fields.filter(f => f.crop && !f.pest);
+          if (empty.length === 0) break;
+          empty[Math.floor(Math.random() * empty.length)].pest = true;
+          state.pendingBugs--;
+          placed++;
         }
-      } else if (w.type === "wind") {
-        const emptyOrPlanted = state.fields.filter(f => !f.status);
-        if (emptyOrPlanted.length > 0) {
-          emptyOrPlanted[Math.floor(Math.random() * emptyOrPlanted.length)].status = "weed";
-          setNarrator("“狂风卷来野草籽，田垄里冒出了争肥抢水的杂草。”");
+        if (placed > 0) {
+          setNarrator("“田垄间窜出害虫！若不清除，每候都要啃掉作物 1 点生命。”");
         }
+        return;
       }
+
+      const planted = state.fields.filter(f => f.crop && !f.pest);
+      if (planted.length === 0) return;
+      if (state.fields.filter(f => f.pest).length >= 3) return;
+      planted[Math.floor(Math.random() * planted.length)].pest = true;
+      setNarrator("“又起了虫害。快用【挥锄除虫】护住庄稼。”");
     }
 
     function triggerSettlement() {
-      const cfg = DIFFICULTIES[state.diffKey];
-      let finalGold = state.gold;
+      const t = tier();
+      const passed = state.legendary || state.gold >= t.tax;
 
-      if (Math.random() < cfg.crashProb && finalGold >= 6) {
-        state.history.crashed = true;
-        finalGold -= Math.floor(finalGold * 0.25);
-      }
-
-      const diff = finalGold - cfg.tax;
-      const isWin = diff >= 0;
-
-      document.getElementById('settle-gold').innerText = `${finalGold} 🪙`;
-      document.getElementById('settle-tax').innerText = `${cfg.tax} 🪙`;
-      document.getElementById('settle-balance').innerText = `${diff >= 0 ? '+' : ''}${diff} 🪙`;
+      document.getElementById('settle-gold').innerText = `${state.gold} 两`;
+      document.getElementById('settle-tax').innerText = `${t.tax} 两`;
+      const diff = state.legendary ? 0 : state.gold - t.tax;
+      document.getElementById('settle-balance').innerText = `${diff >= 0 ? '+' : ''}${diff} 两`;
       document.getElementById('settle-balance').style.color = diff >= 0 ? "#059669" : "#dc2626";
 
       const diagBox = document.getElementById('settle-diagnosis');
 
-      if (isWin) {
-        document.getElementById('settle-badge').innerText = diff >= 6 ? "🌟" : "✅";
-        document.getElementById('settle-title').innerText = diff >= 6 ? "富甲一方·传奇丰收！" : "顺利纳税·安稳过冬！";
+      if (state.legendary) {
+        document.getElementById('settle-badge').innerText = "🌾";
+        document.getElementById('settle-title').innerText = "神农显圣 · 丰稔传世";
+        document.getElementById('settle-subtitle').innerText = "百年月华·金稻 长成";
+        diagBox.style.background = "#ecfdf5";
+        diagBox.style.borderColor = "#a7f3d0";
+        diagBox.style.color = "#065f46";
+        document.getElementById('diag-title').innerText = "【终极传奇胜利】";
+        document.getElementById('diag-desc').innerText = "你亲手培育出了失传百年的【百年月华·金稻】！金穗垂地，光华照耀四野，四方农家无不顶礼赞叹。";
+      } else if (passed) {
+        document.getElementById('settle-badge').innerText = "🏆";
+        document.getElementById('settle-title').innerText = `${t.rank}·${t.name} · 完税嘉奖`;
+        document.getElementById('settle-subtitle').innerText = "二十四候周天已毕 · 大寒结算";
         diagBox.style.background = "#ecfdf5";
         diagBox.style.borderColor = "#a7f3d0";
         diagBox.style.color = "#065f46";
         document.getElementById('diag-title').innerText = "【年终功绩评语】";
-        document.getElementById('diag-desc').innerText = diff >= 6
-          ? "你不仅交齐了繁重的赋税，更存下了殷实家底与丰盈种库，乡邻皆奉你为种田大师！"
-          : "汗滴禾下土，来之不易。你战胜了天灾病害，成功守住了全家温饱！";
+        document.getElementById('diag-desc').innerText = `${t.praise} 你如数缴纳岁赋 ${t.tax} 两（账余 ${state.gold - t.tax} 两），知县特赐“${t.rank}耕模”金匾。`;
       } else {
         document.getElementById('settle-badge').innerText = "💔";
-        document.getElementById('settle-title').innerText = "税银难缴·岁末告负";
+        document.getElementById('settle-title').innerText = `${t.rank}·${t.name} · 欠赋收田`;
+        document.getElementById('settle-subtitle').innerText = "二十四候时令已尽 · 大寒腊月";
         diagBox.style.background = "#fef2f2";
         diagBox.style.borderColor = "#fecaca";
         diagBox.style.color = "#991b1b";
-
-        if (state.history.crashed) {
-          document.getElementById('diag-title').innerText = "🛑 【败因诊断：谷贱伤农】";
-          document.getElementById('diag-desc').innerText = "庄稼收成尚可，奈何秋季集市粮价暴跌，辛苦一整年，微薄利润全被商贾压榨。";
-        } else if (state.history.droughtCount >= 2) {
-          document.getElementById('diag-title').innerText = "🛑 【败因诊断：酷旱绝收】";
-          document.getElementById('diag-desc').innerText = "伏旱高温酷烈，未能及时用【人工浇灌】保墒，眼看着庄稼干枯绝收。";
-        } else if (state.history.pestIgnored >= 2) {
-          document.getElementById('diag-title').innerText = "🛑 【败因诊断：虫害失控】";
-          document.getElementById('diag-desc').innerText = "初见虫害未予理睬，最终蔓延全垄咬空产量。防微杜渐，在田间至关重要。";
-        } else if (state.history.rottenCount >= 2) {
-          document.getElementById('diag-title').innerText = "🛑 【败因诊断：过熟腐烂】";
-          document.getElementById('diag-desc').innerText = "贪多求全而体力不支，庄稼熟透却无暇收割，尽数烂在泥里。";
-        } else if (state.history.seedsKept === 0) {
-          document.getElementById('diag-title').innerText = "🛑 【败因诊断：种子断绝】";
-          document.getElementById('diag-desc').innerText = "前期过早把所有作物换了金币，中后期无种可下导致田地大面积撂荒！务必多选【留作良种】。";
-        } else {
-          document.getElementById('diag-title').innerText = "🛑 【败因诊断：牌组失调】";
-          document.getElementById('diag-desc').innerText = "劳作顺序与精细化管理欠缺，建议多利用【优质农肥】提升单作物的产值。";
-        }
+        document.getElementById('diag-title').innerText = "【破产收田】";
+        document.getElementById('diag-desc').innerText = `官差敲响农舍大门索取岁赋 ${t.tax} 两，而你手头仅余 ${state.gold} 两，无力完赋。官府查封农田抵债……人误地一时，地误人一年。`;
       }
 
       document.getElementById('settlement-modal').classList.remove('hidden');
     }
 
     function render() {
-      const cfg = DIFFICULTIES[state.diffKey];
-      document.getElementById('ui-energy-val').innerText = `${state.stamina}/${cfg.maxStamina}`;
+      const t = tier();
+      document.getElementById('ui-energy-val').innerText = `${state.energy}/${state.energyMax}`;
       document.getElementById('ui-gold').innerText = `${state.gold}`;
-      document.getElementById('ui-tax').innerText = `${cfg.tax}`;
+      document.getElementById('ui-tax').innerText = `${t.tax}`;
 
-      // 渲染 6 块 plant_spot 泥垄
+      // 渲染 6 块泥垄
       const grid = document.getElementById('field-grid');
       grid.innerHTML = '';
       state.fields.forEach((f, idx) => {
@@ -1043,10 +1145,10 @@
         if (state.selectedCardIdx !== null) {
           const selCard = state.hand[state.selectedCardIdx];
           if (selCard.type === "seed" && f.crop === null) div.classList.add('target-highlight');
-          if (selCard.type === "water" && f.crop !== null) div.classList.add('target-highlight');
-          if (selCard.type === "fert" && f.crop !== null && !f.isQuality) div.classList.add('target-highlight');
-          if (selCard.type === "clean" && f.status) div.classList.add('target-highlight');
-          if (selCard.type === "reap" && f.crop !== null && f.growth >= CROPS[f.crop].maxGrowth) div.classList.add('target-highlight');
+          if ((selCard.type === "water" || selCard.type === "defense") && f.crop !== null) div.classList.add('target-highlight');
+          if (selCard.type === "attack" && f.pest) div.classList.add('target-highlight');
+          if (selCard.type === "heal" && f.crop !== null && f.hp < CROPS[f.crop].hp) div.classList.add('target-highlight');
+          if (selCard.type === "waterAll") div.classList.add('target-highlight');
         }
 
         div.onclick = () => applyCardToField(idx);
@@ -1072,26 +1174,25 @@
           `;
         } else {
           const def = CROPS[f.crop];
-          const isMature = f.growth >= def.maxGrowth;
           let statusBadge = '';
-          if (f.status === "pest") statusBadge = `<span class="tag-pest">🐛蚜虫!</span>`;
-          else if (f.status === "weed") statusBadge = `<span class="tag-weed">🌿杂草!</span>`;
-          else if (f.isQuality) statusBadge = `<span class="tag-fert">🧪已施肥</span>`;
+          if (f.pest) statusBadge = `<span class="tag-pest">🐛虫害!</span>`;
+          else if (f.defense > 0) statusBadge = `<span class="tag-def">🛡️免疫 ${f.defense}</span>`;
+          else statusBadge = `<span class="tag-hp ${f.hp <= 2 ? 'low' : ''}">❤️ ${f.hp}/${def.hp}</span>`;
 
           content = `
             <div class="spot-top-row">
-              <span class="water-marker-badge">💧 ${f.water}/${def.waterNeed}</span>
-              <span class="stage-badge ${isMature ? 'ready' : ''}">${isMature ? '🌾成熟可割!' : `生长期: ${f.growth}/${def.maxGrowth}`}</span>
+              <span class="water-marker-badge">💧 ${f.water}</span>
+              <span class="stage-badge">生长期: ${f.growth}/${def.grow}</span>
             </div>
             <div class="spot-center-crop">
               <div class="crop-icon-large">${def.icon}</div>
               <div class="crop-meta-box">
-                <div class="crop-title-name">${def.name} ${f.isQuality ? '✨' : ''}</div>
-                <div style="font-size:12px; color:#86efac;">${isMature ? '饱满已熟' : '抽芽拔节中'}</div>
+                <div class="crop-title-name">${def.name}</div>
+                <div style="font-size:12px; color:#86efac;">${f.growth >= def.grow ? '已成熟' : '抽芽拔节中'}</div>
               </div>
             </div>
             <div class="spot-bottom-status">
-              <span>${statusBadge || '正常生长'}</span>
+              <span>${statusBadge}</span>
               <span>#${idx + 1} 垄</span>
             </div>
           `;
@@ -1100,7 +1201,7 @@
         grid.appendChild(div);
       });
 
-      // 渲染手牌 (Cardwork Cycle card_xxx.svg 形式)
+      // 渲染手牌
       const handBox = document.getElementById('hand-container');
       handBox.innerHTML = '';
       document.getElementById('deck-count').innerText = state.deck.length;
@@ -1109,12 +1210,12 @@
       state.hand.forEach((card, idx) => {
         const isSelected = state.selectedCardIdx === idx;
         const btn = document.createElement('div');
-        
+
         let cardClass = "card-seed";
-        if (card.type === "water") cardClass = "card-water";
-        else if (card.type === "fert") cardClass = "card-fert";
-        else if (card.type === "clean") cardClass = "card-clean";
-        else if (card.type === "reap") cardClass = "card-reap";
+        if (card.type === "water" || card.type === "waterAll") cardClass = "card-water";
+        else if (card.type === "attack") cardClass = "card-atk";
+        else if (card.type === "defense") cardClass = "card-def";
+        else if (card.type === "draw" || card.type === "energy" || card.type === "heal" || card.type === "healAll") cardClass = "card-util";
 
         btn.className = `card-item ${cardClass} ${isSelected ? 'selected' : ''}`;
         btn.onclick = () => selectCard(idx);
@@ -1133,7 +1234,7 @@
       const tip = document.getElementById('selected-card-tip');
       if (state.selectedCardIdx !== null) {
         const c = state.hand[state.selectedCardIdx];
-        tip.innerHTML = `👉 已选中 <b>【${c.name}】</b> (消耗 ⚡${c.cost})。请点击目标田地劳作。`;
+        tip.innerHTML = `👉 已选中 <b>【${c.name}】</b> (消耗 ⚡${c.cost})。请点击目标田块劳作。`;
       } else {
         tip.innerHTML = "👈 请点击下方手牌，再点击上方田块劳作";
       }
