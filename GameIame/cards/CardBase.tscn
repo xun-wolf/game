@@ -1,0 +1,56 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://fonts/SimHei.ttf" type="DynamicFontData" id=1]
+[ext_resource path="res://cards/card1_mod.svg" type="Texture" id=2]
+[ext_resource path="res://cards/CardBase.gd" type="Script" id=3]
+[ext_resource path="res://cards/icons/technique.svg" type="Texture" id=4]
+
+[sub_resource type="DynamicFont" id=1]
+size = 38
+use_filter = true
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 30
+use_filter = true
+font_data = ExtResource( 1 )
+
+[node name="CardBase" type="Sprite"]
+scale = Vector2( 0.5, 0.5 )
+texture = ExtResource( 2 )
+script = ExtResource( 3 )
+
+[node name="Title" type="Label" parent="."]
+margin_left = -178.0
+margin_top = -262.0
+margin_right = 198.0
+margin_bottom = -200.0
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_fonts/font = SubResource( 1 )
+text = "一张卡牌"
+
+[node name="Desc" type="RichTextLabel" parent="."]
+margin_left = -188.0
+margin_top = 4.0
+margin_right = 186.0
+margin_bottom = 253.0
+custom_colors/default_color = Color( 0, 0, 0, 1 )
+custom_fonts/normal_font = SubResource( 3 )
+bbcode_enabled = true
+bbcode_text = "[center]这张卡牌会做一些事，希望多少能和 Ludum Dare 的 [color=#3d3]3[/color]“收获”主题扯上点关系。[/center]"
+text = "这张卡牌会做一些事，希望多少能和 Ludum Dare 的 3“收获”主题扯上点关系。"
+
+[node name="Cost" type="Label" parent="."]
+margin_left = 134.0
+margin_top = -266.0
+margin_right = 168.0
+margin_bottom = -204.0
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_fonts/font = SubResource( 1 )
+text = "9"
+align = 1
+autowrap = true
+
+[node name="Icon" type="Sprite" parent="."]
+position = Vector2( 0, -100 )
+texture = ExtResource( 4 )

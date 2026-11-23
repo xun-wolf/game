@@ -1,0 +1,23 @@
+DifficultyManager.gd:22  🪙  |  "desc": "岁赋 18 🪙 | 害虫温和，风调雨顺",
+DifficultyManager.gd:35  🪙  |  "desc": "岁赋 24 🪙 | 官吏苛征，一候一两银",
+DifficultyManager.gd:48  🪙  |  "desc": "岁赋 24 🪙 | 凶虫横行，开局直面硬壳巨虫",
+DifficultyManager.gd:61  🪙  |  "desc": "岁赋 24 🪙 | 凶虫袭扰 + 大旱：盛夏每阶段 3 点水",
+DifficultyManager.gd:74  🪙  |  "desc": "岁赋 30 🪙 | 苛政 + 大旱：盛夏每阶段 3 点水，唯有金稻破局",
+Game.tscn:898  🪙🎯🌸  |  text = "存银: 0 🪙  |  岁赋: 18 🎯\n🌸 春耕 · 立春 (距入夏 6 候)"
+Game.tscn:917  🌸  |  text = "🌸【立春 · 农事初兴】春回大地，草木萌发。好雨知时节，当春乃发生！"
+GoldLabel.gd:26  🪙🎯  |  text = "存银: " + String(GS.gold) + " 🪙  |  岁赋: " + String(GS.tax_amount) + " 🎯" + tier_tag + "\n" + s
+MainMenu.tscn:104  🪙  |  text = "岁赋 18 🪙 | 害虫温和，风调雨顺"
+MainMenu.tscn:113  ⚔️  |  text = "【⚔️ 待攻坚 · 耕耘挑战】"
+SeasonManager.gd:12  🌸☀️🍁❄️  |  const SEASON_TITLES = ["🌸 春耕", "☀️ 夏耘", "🍁 秋收", "❄️ 冬藏"]
+SeasonManager.gd:42  🌸  |  Season.SPRING: "🌸【立春 · 农事初兴】春回大地，草木萌发。好雨知时节，当春乃发生！",
+SeasonManager.gd:43  ☀️  |  Season.SUMMER: "☀️【立夏 · 万物繁盛】时序入夏，草木成荫。日光热烈，需勤加浇灌！",
+SeasonManager.gd:44  🍁  |  Season.AUTUMN: "🍁【立秋 · 金风送爽】金风拂面，硕果累累。正是挑粮变现之良机！",
+SeasonManager.gd:45  ❄️  |  Season.WINTER: "❄️【立冬 · 岁暮天寒】严冬已至，寒霜覆田。岁末官税结算在即，备足存银！"
+SeasonManager.gd:174  🌸  |  return "🌸 春耕"
+ui\DifficultySelector.gd:20  🏆  |  status_label.text = "【🏆 已通关 · 榜上有名】"
+ui\DifficultySelector.gd:23  ⚔️  |  status_label.text = "【⚔️ 待攻坚 · 耕耘挑战】"
+ui\NewCardSelection.gd:85  💰  |  $GoldButton.text = "💰 挑粮入市 (换 " + str(gold_val) + " 金币)"
+ui\NewCardSelection.gd:102  ✨✨  |  $WinMenu/Label.text = "✨ 神农显圣 · 丰稔传世 ✨"
+ui\NewCardSelection.gd:119  🌾🌾  |  $WinMenu/Label.text = "🌾 " + tier_name + " · 完税嘉奖 🌾"
+ui\NewCardSelection.gd:125  🍂🍂  |  $WinMenu/Label.text = "🍂 " + tier_name + " · 欠赋收田 🍂"
+ui\NewCardSelection.tscn:158  💰  |  text = "💰 挑粮入市 (换 3 金币)"

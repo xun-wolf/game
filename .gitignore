@@ -1,0 +1,26 @@
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# Godot 缓存
+GameIame/.godot/
+GameIame/.import/
+
+# 音频/音效工程源文件（体积大，非游戏运行所需）
+*.aup3
+*.rpp-bak
+*.tpz
+
+# 导出发布包
+Bin/
+
+# 归档、截图
+_archive/
+_shots/
+
+# Python
+__pycache__/
+*.pyc
+
+# 日志
+*.log
