@@ -30,11 +30,22 @@ func _ready():
 	_build_fx()
 	_cards = [$Stage/Card1, $Stage/Card2, $Stage/Card3, $Stage/Card4]
 	$Title.rect_pivot_offset = $Title.rect_size * 0.5
+	_fit_to_viewport()
+	if not get_viewport().is_connected("size_changed", self, "_fit_to_viewport"):
+		get_viewport().connect("size_changed", self, "_fit_to_viewport")
 	_show_skip_hint()
-	if Flags.skip_tutorial or (Flags.quick_intro_on_revisit and _has_seen()):
+	# 开场是否极简只看菜单开关与是否已看；「跳过新手教程」只影响进入游戏后的教程
+	if Flags.quick_intro_on_revisit and _has_seen():
 		_start_quick()
 	else:
 		_start_beat(0)
+
+# 按 1080x800 设计稿等比缩放并居中，避免窗口尺寸不同导致构图被裁切
+func _fit_to_viewport():
+	var vp = get_viewport_rect().size
+	var k = min(vp.x / 1080.0, vp.y / 800.0)
+	rect_scale = Vector2(k, k)
+	rect_position = (vp - Vector2(1080, 800) * k) * 0.5
 
 func _process(delta):
 	if _finished:
@@ -88,6 +99,7 @@ func _finish():
 func _start_beat(index):
 	_beat = index
 	_beat_elapsed = 0.0
+	_update_dots(index)
 	match index:
 		0:
 			_beat_ruin()
@@ -189,6 +201,8 @@ func _start_quick():
 	_quick = true
 	_beat = -1
 	_beat_elapsed = 0.0
+	for d in [$Dot1, $Dot2, $Dot3, $Dot4]:
+		d.visible = false
 	$Stage.visible = false
 	$Stage/Scroll.visible = false
 	$Stage/Deck.visible = false
@@ -205,6 +219,15 @@ func _start_quick():
 
 func _tween_prop(obj, prop, from_value, to_value, dur, delay = 0.0, trans_type = Tween.TRANS_CUBIC, ease_type = Tween.EASE_OUT):
 	$Tween.interpolate_property(obj, prop, from_value, to_value, dur, trans_type, ease_type, delay)
+
+func _update_dots(active):
+	var dots = [$Dot1, $Dot2, $Dot3, $Dot4]
+	for i in range(dots.size()):
+		if i == active:
+			dots[i].color = Color(0.95, 0.85, 0.6, 1)
+		else:
+			dots[i].color = Color(0.4, 0.38, 0.34, 0.7)
+		dots[i].visible = true
 
 func _set_subtitle(index):
 	$Subtitle.text = SUBTITLES[index]

@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=17 format=2]
 
 [ext_resource path="res://ui/MainUITheme.tres" type="Theme" id=1]
 [ext_resource path="res://Intro.gd" type="Script" id=2]
@@ -15,10 +15,11 @@
 [ext_resource path="res://cards/card_attak.svg" type="Texture" id=13]
 [ext_resource path="res://cards/card_tank.svg" type="Texture" id=14]
 [ext_resource path="res://ui/title_cn.png" type="Texture" id=15]
+[ext_resource path="res://farm/farmland_1.png" type="Texture" id=16]
 
 [node name="Control" type="Control"]
-anchor_right = 1.0
-anchor_bottom = 1.0
+margin_right = 1080.0
+margin_bottom = 800.0
 mouse_filter = 2
 theme = ExtResource( 1 )
 script = ExtResource( 2 )
@@ -34,15 +35,39 @@ modulate = Color( 0.62, 0.68, 0.78, 1 )
 
 [node name="Stage" type="Node2D" parent="."]
 
+[node name="Soil1" type="Sprite" parent="Stage"]
+position = Vector2( 140, 690 )
+scale = Vector2( 2.2, 2.2 )
+modulate = Color( 0.5, 0.47, 0.42, 1 )
+texture = ExtResource( 16 )
+
+[node name="Soil2" type="Sprite" parent="Stage"]
+position = Vector2( 420, 690 )
+scale = Vector2( 2.2, 2.2 )
+modulate = Color( 0.5, 0.47, 0.42, 1 )
+texture = ExtResource( 16 )
+
+[node name="Soil3" type="Sprite" parent="Stage"]
+position = Vector2( 700, 690 )
+scale = Vector2( 2.2, 2.2 )
+modulate = Color( 0.5, 0.47, 0.42, 1 )
+texture = ExtResource( 16 )
+
+[node name="Soil4" type="Sprite" parent="Stage"]
+position = Vector2( 980, 690 )
+scale = Vector2( 2.2, 2.2 )
+modulate = Color( 0.5, 0.47, 0.42, 1 )
+texture = ExtResource( 16 )
+
 [node name="TreeBig" type="Sprite" parent="Stage"]
-position = Vector2( 150, 545 )
-scale = Vector2( 5, 5 )
+position = Vector2( 120, 545 )
+scale = Vector2( 4, 4 )
 modulate = Color( 0.32, 0.37, 0.33, 1 )
 texture = ExtResource( 4 )
 
 [node name="TreePine" type="Sprite" parent="Stage"]
-position = Vector2( 960, 600 )
-scale = Vector2( 6, 6 )
+position = Vector2( 985, 610 )
+scale = Vector2( 4.5, 4.5 )
 modulate = Color( 0.27, 0.33, 0.29, 1 )
 texture = ExtResource( 5 )
 
@@ -163,5 +188,37 @@ custom_colors/font_color = Color( 0.85, 0.83, 0.78, 0.9 )
 custom_font_sizes/font_size = 12
 text = "点击继续 · 长按跳过"
 align = 2
+
+[node name="Dot1" type="ColorRect" parent="."]
+margin_left = 522.0
+margin_top = 662.0
+margin_right = 530.0
+margin_bottom = 670.0
+mouse_filter = 2
+color = Color( 0.95, 0.85, 0.6, 1 )
+
+[node name="Dot2" type="ColorRect" parent="."]
+margin_left = 540.0
+margin_top = 662.0
+margin_right = 548.0
+margin_bottom = 670.0
+mouse_filter = 2
+color = Color( 0.4, 0.38, 0.34, 0.7 )
+
+[node name="Dot3" type="ColorRect" parent="."]
+margin_left = 558.0
+margin_top = 662.0
+margin_right = 566.0
+margin_bottom = 670.0
+mouse_filter = 2
+color = Color( 0.4, 0.38, 0.34, 0.7 )
+
+[node name="Dot4" type="ColorRect" parent="."]
+margin_left = 576.0
+margin_top = 662.0
+margin_right = 584.0
+margin_bottom = 670.0
+mouse_filter = 2
+color = Color( 0.4, 0.38, 0.34, 0.7 )
 
 [node name="Tween" type="Tween" parent="."]
