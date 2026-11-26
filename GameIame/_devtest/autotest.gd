@@ -55,6 +55,8 @@ func _ready():
 	check_p3_values()
 	yield(check_starter_deck(), "completed")
 	check_harvest_queue()
+	check_final_tax_timing()
+	check_run_stats()
 
 	say("=== AUTOTEST DONE ===")
 	logfile.close()
@@ -320,6 +322,7 @@ func check_win_card_gate():
 
 func check_p3_values():
 	say("[T] 掐枝保穗伤害 = " + str(GS.card_sacrif1_1enem.quantity) + "（期望 3）")
+	say("[T] 固定虫王血量 tier4/5 = " + str(DifficultyManager.get_bug_king_hp(4)) + "/" + str(DifficultyManager.get_bug_king_hp(5)) + "（期望 12/12）")
 	var old_tier = DifficultyManager.current_tier
 	var saved_gold = GS.gold
 	DifficultyManager.set_tier(4)
@@ -330,6 +333,52 @@ func check_p3_values():
 	say("[T] 大暑修渠 tier1 低存银: paid=" + str(GS.apply_midrun_cost()) + " gold=" + str(GS.gold))
 	GS.gold = saved_gold
 	DifficultyManager.set_tier(old_tier)
+
+func check_final_tax_timing():
+	# 模拟第 24 候：先有收获面板，结算排队；收获卖粮后再显示结算，应按最新存银判定
+	var saved_turn = GS.current_turn
+	var saved_tax = GS.tax_amount
+	var saved_gold = GS.gold
+	GS.current_turn = 24
+	GS.tax_amount = 18
+	GS.gold = 10
+	GS.selection_queue.clear()
+	GS.waiting_for_card_selection = false
+
+	var pool = [GS.card_basic_plant, GS.card_small_attack, GS.card_free_1x1_water]
+	GS.popup_card_selection(pool, 1)
+	GS.enqueue_selection({"kind": "final_tax"})
+	GS.gold += 10
+	GS.resolve_selection()
+
+	var label = GS.card_selector_ui.win_menu.get_node("Label").text
+	say("[T] 终局时序: gold=20 tax=18 结算判定=" + label)
+
+	GS.card_selector_ui.win_menu.hide()
+	GS.card_selector_ui.get_parent().hide()
+	GS.card_selector_ui.is_settlement = false
+	GS.waiting_for_card_selection = false
+	GS.selection_queue.clear()
+	GS.gold = saved_gold
+	GS.tax_amount = saved_tax
+	GS.current_turn = saved_turn
+
+func check_run_stats():
+	var f = File.new()
+	if not f.file_exists(GS.RUN_STATS_PATH):
+		say("[T] 统计日志: 文件不存在")
+		return
+	f.open(GS.RUN_STATS_PATH, File.READ)
+	var lines = 0
+	var last = ""
+	while not f.eof_reached():
+		var line = f.get_line()
+		if line != "":
+			lines += 1
+			last = line
+	f.close()
+	say("[T] 统计日志: 行数=" + str(lines))
+	say("[T] 统计日志: 最后一行=" + last)
 
 func check_harvest_queue():
 	GS.selection_queue.clear()

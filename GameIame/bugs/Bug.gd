@@ -45,6 +45,9 @@ func announce_king():
 	# 虫王出场给一条横幅提示（复用季节横幅那套 toast）+ 低频轰鸣 + 地面震动
 	if not is_inside_tree():
 		return
+	if GS != null:
+		GS.stats_on_king_spawn()
+		king_spawn_turn = GS.current_turn
 	if SeasonManager != null:
 		SeasonManager.show_king_banner("【虫王来袭】田垄轰鸣，黑甲虫王破土而出！")
 	shake_camera(0.55, 7.0)
@@ -63,6 +66,9 @@ var next_action = 0
 var current_plant_target = null
 
 var spawned = false
+
+# 虫王出场候，用于统计存活回合
+var king_spawn_turn = 0
 
 func spawn_now():
 	spawned = true
@@ -87,6 +93,8 @@ func dec_health():
 		amount = 1
 	health -= amount
 	if health <= 0:
+		if tier == 4 and GS != null:
+			GS.stats_on_king_defeated(max(GS.current_turn - king_spawn_turn, 0))
 		remove_from_group("Enemy")
 		remove_from_group("Object")
 		$AnimationPlayer.queue("OutOfHealth")

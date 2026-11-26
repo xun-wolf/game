@@ -204,12 +204,15 @@ func _on_ConfirmButton_pressed():
 				
 			CardCreation.picked_cat(card.associated_card.cat)
 			
+	var took_gold = $GoldButton.pressed
 	remove_card_children()
 			
-	if $GoldButton.pressed:
+	if took_gold:
 		$GoldButton.pressed = false
 		var gold_val = get_gold_for_level(current_plant_level)
 		GS.gold += gold_val
+	
+	GS.stats_on_harvest_choice(took_gold)
 	
 	# 同候还有其它成熟作物时切换到下一株，否则收起面板
 	if not GS.resolve_selection():

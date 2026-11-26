@@ -117,6 +117,7 @@ const TIER_DATA = {
 		"drought_first": 10,
 		"drought_last": 12,
 		"king_turns": [21],
+		"king_hp": 12,
 		"midrun_cost": 6,
 		"start_gold": 6,
 		"desc": "岁赋 24 两 | 虫王 21 候压阵 + 大暑 10-12 候双倍水；接济 6 两",
@@ -134,7 +135,8 @@ const TIER_DATA = {
 		"drought_first": 10,
 		"drought_last": 14,
 		"king_turns": [18, 21],
-		"midrun_cost": 8,
+		"king_hp": 12,
+		"midrun_cost": 6,
 		"start_gold": 6,
 		"desc": "岁赋 32 两 | 虫王 18/21 候来袭 + 长旱 10-14 候双倍水；接济 6 两",
 		"win_praise": "绝境登神，光耀华夏，创万世不拔之基业！"
@@ -243,6 +245,11 @@ func get_bug_max_kings(t: int = -1) -> int:
 func get_bug_king_turns(t: int = -1) -> Array:
 	var key = current_tier if t == -1 else t
 	return TIER_DATA[key]["king_turns"]
+
+# 固定虫王的血量（未配置的品级为 9）
+func get_bug_king_hp(t: int = -1) -> int:
+	var key = current_tier if t == -1 else t
+	return int(TIER_DATA[key].get("king_hp", 9))
 
 func get_drought_first(t: int = -1) -> int:
 	var key = current_tier if t == -1 else t

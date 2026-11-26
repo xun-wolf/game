@@ -54,6 +54,7 @@ func _on_buy():
 			elif up_num == 4:
 				GS.auto_water = true
 
+		GS.stats_on_purchase(name)
 		update_button()
 
 func _process(delta):

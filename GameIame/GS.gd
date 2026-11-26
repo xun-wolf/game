@@ -49,6 +49,71 @@ var waiting_for_card_selection = false
 # 同一候可能有多株成熟，或胜利/结算与收获同候触发：统一排队，避免面板互相覆盖丢奖励。
 var selection_queue = []
 
+# 对局统计（P0 埋点）：结算时追加一行 JSON，供平衡灰度测试汇总
+const RUN_STATS_PATH = "user://run_stats.jsonl"
+var run_stats = {}
+
+func stats_reset():
+	run_stats = {
+		"harvests": {"1": 0, "2": 0, "3": 0},
+		"gold_choices": 0,
+		"card_choices": 0,
+		"purchases": {},
+		"king_spawns": 0,
+		"king_kills": 0,
+		"king_alive_turns": 0,
+		"golden_rice": false
+	}
+
+func stats_on_harvest(level):
+	var key = str(level)
+	run_stats["harvests"][key] = int(run_stats["harvests"].get(key, 0)) + 1
+
+func stats_on_harvest_choice(took_gold: bool):
+	if took_gold:
+		run_stats["gold_choices"] += 1
+	else:
+		run_stats["card_choices"] += 1
+
+func stats_on_purchase(item_name: String):
+	run_stats["purchases"][item_name] = int(run_stats["purchases"].get(item_name, 0)) + 1
+
+func stats_on_king_spawn():
+	run_stats["king_spawns"] += 1
+
+func stats_on_king_defeated(turns_alive: int):
+	run_stats["king_kills"] += 1
+	run_stats["king_alive_turns"] += turns_alive
+
+func stats_on_golden_rice():
+	run_stats["golden_rice"] = true
+
+func save_run_stats(end_reason: String, passed: bool, final_gold: int):
+	var data = {
+		"date": OS.get_datetime(),
+		"tier": DifficultyManager.current_tier,
+		"end": end_reason,
+		"passed": passed,
+		"gold": final_gold,
+		"tax": tax_amount,
+		"turns": current_turn,
+		"harvests": run_stats["harvests"],
+		"gold_choices": run_stats["gold_choices"],
+		"card_choices": run_stats["card_choices"],
+		"purchases": run_stats["purchases"],
+		"king_spawns": run_stats["king_spawns"],
+		"king_kills": run_stats["king_kills"],
+		"king_alive_turns": run_stats["king_alive_turns"],
+		"golden_rice": run_stats["golden_rice"]
+	}
+	var f = File.new()
+	if f.file_exists(RUN_STATS_PATH) and f.open(RUN_STATS_PATH, File.READ_WRITE) == OK:
+		f.seek_end()
+	else:
+		f.open(RUN_STATS_PATH, File.WRITE)
+	f.store_line(to_json(data))
+	f.close()
+
 var card_selector_ui = null
 var gold = 0
 var current_turn = 1
@@ -66,12 +131,16 @@ var new_cards_mouse = false
 var end_turn_mouse = false
 
 func popup_card_selection(card_set: Array, plant_level = 1):
+	stats_on_harvest(plant_level)
 	enqueue_selection({"kind": "harvest", "cards": card_set, "level": plant_level})
 	
 func popup_card_winner():
+	stats_on_golden_rice()
+	save_run_stats("golden_rice", true, gold)
 	enqueue_selection({"kind": "win"})
 
 func popup_tax_settlement(passed: bool, current_gold: int, target_tax: int):
+	save_run_stats("tax", passed, current_gold)
 	enqueue_selection({"kind": "tax", "passed": passed, "gold": current_gold, "tax": target_tax})
 
 func enqueue_selection(item: Dictionary):
@@ -90,6 +159,12 @@ func show_next_selection():
 		card_selector_ui.setup_cards(item["cards"], item["level"])
 	elif item["kind"] == "win":
 		card_selector_ui.setup_win()
+	elif item["kind"] == "final_tax":
+		# 终局结算要等前面排队的收获都结算完，再按最新存银判定
+		var final_gold = gold
+		var passed = final_gold >= tax_amount
+		save_run_stats("tax", passed, final_gold)
+		card_selector_ui.setup_tax_settlement(passed, final_gold, tax_amount)
 	else:
 		card_selector_ui.setup_tax_settlement(item["passed"], item["gold"], item["tax"])
 	card_selector_ui.popup()
@@ -104,7 +179,8 @@ func resolve_selection():
 
 func _settle_after_animations():
 	yield(get_tree().create_timer(0.9), "timeout")
-	popup_tax_settlement(gold >= tax_amount, gold, tax_amount)
+	# 只排入队列；真正的存银判定等轮到它显示时再做，避免第 24 候收获金未入账
+	enqueue_selection({"kind": "final_tax"})
 
 # 第 12 候大暑修渠：给中段一个强制金币出口，避免全程囤积
 func apply_midrun_cost() -> int:
@@ -593,12 +669,6 @@ func turn_processor():
 	current_obj = null
 	return null
 	
-enum SpawnOpt {
-	Bug2,
-	Bug3,
-	Bug5,
-	Bug9
-}
 # 虫潮的节奏与波次池由 DifficultyManager 按品级配置，这里只负责抽取与落位。
 # 连续多波没有出过 5 血以上的虫时，下一波强制补一只，避免长时间“没虫”。
 var waves_since_strong = 0
@@ -627,17 +697,9 @@ func roll_bug_hp(pool):
 			return entry[0]
 	return pool[0][0]
 
-func bug_opt_for_hp(hp):
-	if hp == 2:
-		return SpawnOpt.Bug2
-	if hp == 3:
-		return SpawnOpt.Bug3
-	if hp == 5:
-		return SpawnOpt.Bug5
-	return SpawnOpt.Bug9
-
 # 在随机作物的附近找一格空地放虫，返回是否成功。
-func spawn_bug_at_plant(item, plants):
+# 立绘按血量分四档：2/3/5/9+，血量本身可被品级配置覆盖（如固定虫王 12 血）。
+func spawn_bug_at_plant(hp, plants):
 	for attempt in range(0, 100):
 		var p = plants[randi() % plants.size()]
 		var x = (randi() % 5) - 2
@@ -649,19 +711,16 @@ func spawn_bug_at_plant(item, plants):
 		var bug = Bug.instance()
 		bug.position = pos
 
-		# 立绘跟血量走：2/3/5/9 分别对应四档外观
-		if item == SpawnOpt.Bug2:
-			bug.tier = 1
-			bug.health = 2
-		if item == SpawnOpt.Bug3:
-			bug.tier = 2
-			bug.health = 3
-		if item == SpawnOpt.Bug5:
-			bug.tier = 3
-			bug.health = 5
-		if item == SpawnOpt.Bug9:
+		# 立绘跟血量走：2/3/5/9+ 分别对应四档外观，血量本身可以是 9 或 12
+		if hp >= 9:
 			bug.tier = 4
-			bug.health = 9
+		elif hp >= 5:
+			bug.tier = 3
+		elif hp >= 3:
+			bug.tier = 2
+		else:
+			bug.tier = 1
+		bug.health = hp
 
 		tilemap.add_child(bug)
 		return true
@@ -680,8 +739,8 @@ func spawn_enemies():
 	var plan = [] # 虫血列表
 	
 	if is_bug_king_wave(current_turn):
-		# 虫王携小虫压阵
-		plan.append(9)
+		# 虫王携小虫压阵，血量按品级配置（三品/一品 12 血）
+		plan.append(DifficultyManager.get_bug_king_hp())
 		for i in range(max(size - 1, 1)):
 			plan.append(3)
 	else:
@@ -706,7 +765,7 @@ func spawn_enemies():
 		# Don't spawn more than 5 enemies at once
 		if count_enemys >= 5:
 			break
-		if not spawn_bug_at_plant(bug_opt_for_hp(hp), plants):
+		if not spawn_bug_at_plant(hp, plants):
 			continue
 		count_enemys += 1
 		if hp >= 5:
@@ -838,6 +897,7 @@ func reset_all_state():
 	turn_state = TurnState.UNDEFINED
 	waiting_for_card_selection = false
 	selection_queue = []
+	stats_reset()
 
 	card_selector_ui = null
 	# 一品·神农绝境 有乡邻接济的起始存银
