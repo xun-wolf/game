@@ -1,90 +1,278 @@
 extends Control
 
-# 开场卷轴：逐字书写 + 墨迹显影。
-# 点击一次补全当前段，已补全时再点击推进到下一段。
-const CHARS_PER_SEC = 26.0
-const PUNCT_STOP = 0.10
-const PUNCTUATION = ["，", "。", "：", "；", "！", "？", "、", "…", "”"]
+# 开场动画：四幕卷轴分镜
+# 1 荒芜  2 石下卷轴  3 四季成牌  4 接牌入田
+# 交互：点击/空格推进，长按或 ESC 跳过；回访玩家走 2.4 秒极简版。
 
-const INK_REVEAL_TIME = 1.15
+const BEAT_TIMES = [3.2, 3.6, 4.2, 3.2]
+const SUBTITLES = [
+	"地荒了三年，草比人高。",
+	"石头下压着上一任农夫的卷轴。",
+	"四季，被他写成了一副牌。",
+	"今年，换你来打。"
+]
+const SEEN_PATH = "user://intro_seen.json"
+const LONG_PRESS_MS = 600
+const QUICK_TIME = 2.4
 
-var active_label = null
-var shown = 0.0
-var pause_left = 0.0
+var _beat = -1
+var _beat_elapsed = 0.0
+var _finished = false
+var _quick = false
+var _pressing = false
+var _press_ms = 0
 
-func _on_Button_pressed():
-	SceneTransitions.change_scene_to(GS.Game)
+var _snow = null
+var _dust = null
+var _cards = []
 
 func _ready():
-	if Flags.skip_tutorial:
-		$L4.text = "环顾你的新农场，你发现一块模样古怪的石头。石头下面藏着一卷落满灰尘的卷轴，还有一副落灰更厚的卡组。"
-	for label in [$L1, $L2, $L3, $L4]:
-		label.visible_characters = 0
-	$AnimationPlayer.connect("animation_started", self, "_on_animation_started")
-	_play_ink_reveal()
-	# 自动播放的 Start 可能在 _ready 之前就已经开始，这里补一次初始化
-	if $AnimationPlayer.current_animation != "":
-		_on_animation_started($AnimationPlayer.current_animation)
-
-func _play_ink_reveal():
-	var mat = $InkOverlay.material
-	if mat == null or not (mat is ShaderMaterial):
-		$InkOverlay.visible = false
-		return
-	$InkOverlay.visible = true
-	mat.set_shader_param("progress", 1.0)
-	$Tween.interpolate_method(self, "_set_ink", 1.0, 0.0, INK_REVEAL_TIME,
-		Tween.TRANS_SINE, Tween.EASE_OUT)
-	$Tween.interpolate_callback(self, INK_REVEAL_TIME + 0.05, "_hide_ink")
-	$Tween.start()
-
-func _set_ink(value):
-	$InkOverlay.material.set_shader_param("progress", value)
-
-func _hide_ink():
-	$InkOverlay.visible = false
-
-func _on_animation_started(name):
-	var map = {"Start": $L1, "Second": $L2, "Third": $L3, "Fourth": $L4}
-	active_label = map.get(name, null)
-	shown = 0.0
-	pause_left = 0.0
-	if active_label != null:
-		active_label.visible_characters = 0
+	_build_fx()
+	_cards = [$Stage/Card1, $Stage/Card2, $Stage/Card3, $Stage/Card4]
+	$Title.rect_pivot_offset = $Title.rect_size * 0.5
+	_show_skip_hint()
+	if Flags.skip_tutorial or (Flags.quick_intro_on_revisit and _has_seen()):
+		_start_quick()
+	else:
+		_start_beat(0)
 
 func _process(delta):
-	_tick_typewriter(delta)
-	if Input.is_action_just_pressed("mouse"):
-		if _is_text_complete():
-			var anim = $AnimationPlayer
-			anim.seek(anim.current_animation_length)
+	if _finished:
+		return
+	if _pressing and OS.get_ticks_msec() - _press_ms >= LONG_PRESS_MS:
+		_finish()
+		return
+	_beat_elapsed += delta
+	var dur = QUICK_TIME if _quick else BEAT_TIMES[max(0, _beat)]
+	if _beat_elapsed >= dur:
+		_advance()
+
+func _unhandled_input(event):
+	if _finished:
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.scancode == KEY_ESCAPE:
+			_finish()
+		elif event.scancode == KEY_SPACE or event.scancode == KEY_ENTER:
+			_advance()
+	elif event is InputEventMouseButton and event.button_index == BUTTON_LEFT:
+		if event.pressed:
+			_pressing = true
+			_press_ms = OS.get_ticks_msec()
 		else:
-			_complete_text()
+			var held = OS.get_ticks_msec() - _press_ms
+			_pressing = false
+			if held < LONG_PRESS_MS:
+				_advance()
 
-func _tick_typewriter(delta):
-	if active_label == null:
+func _advance():
+	if _finished:
 		return
-	var total = active_label.text.length()
-	if int(shown) >= total:
+	if _quick or _beat >= BEAT_TIMES.size() - 1:
+		_finish()
 		return
-	if pause_left > 0.0:
-		pause_left -= delta
-		return
-	shown = min(shown + CHARS_PER_SEC * delta, float(total))
-	var idx = int(shown)
-	active_label.visible_characters = idx
-	if idx > 0:
-		var ch = active_label.text.substr(idx - 1, 1)
-		if PUNCTUATION.has(ch):
-			pause_left = PUNCT_STOP
+	$Tween.stop_all()
+	_start_beat(_beat + 1)
 
-func _is_text_complete():
-	if active_label == null:
-		return true
-	return int(shown) >= active_label.text.length()
-
-func _complete_text():
-	if active_label == null:
+func _finish():
+	if _finished:
 		return
-	shown = active_label.text.length()
-	active_label.visible_characters = -1
+	_finished = true
+	_pressing = false
+	$Tween.stop_all()
+	_mark_seen()
+	SceneTransitions.change_scene_to(GS.Game)
+
+# ---------------- 四幕 ----------------
+
+func _start_beat(index):
+	_beat = index
+	_beat_elapsed = 0.0
+	match index:
+		0:
+			_beat_ruin()
+		1:
+			_beat_scroll()
+		2:
+			_beat_cards()
+		3:
+			_beat_hand()
+
+func _beat_ruin():
+	$Stage.visible = true
+	$Stage.scale = Vector2.ONE
+	$Stage.position = Vector2.ZERO
+	$Stage/Scroll.visible = false
+	$Stage/Deck.visible = false
+	$Title.visible = false
+	for c in _cards:
+		c.visible = false
+	_set_subtitle(0)
+	_snow.emitting = true
+	_tween_prop($Stage, "position", Vector2.ZERO, Vector2(26, 0),
+		BEAT_TIMES[0], 0.0, Tween.TRANS_SINE, Tween.EASE_IN_OUT)
+	$Tween.start()
+
+func _beat_scroll():
+	var focus = Vector2(760, 620)
+	var zoom = 1.18
+	_tween_prop($Stage, "scale", $Stage.scale, Vector2(zoom, zoom), 1.2)
+	_tween_prop($Stage, "position", $Stage.position, focus * (1.0 - zoom), 1.2)
+
+	$Stage/Scroll.visible = true
+	$Stage/Scroll.modulate = Color(0.85, 0.77, 0.63, 0)
+	$Stage/Scroll.position = Vector2(700, 545)
+	$Stage/Scroll.scale = Vector2(0.18, 0.18)
+	_tween_prop($Stage/Scroll, "modulate:a", 0.0, 1.0, 0.7)
+	_tween_prop($Stage/Scroll, "position", Vector2(700, 545), Vector2(700, 500), 0.9)
+
+	$Stage/Deck.visible = true
+	$Stage/Deck.modulate = Color(1, 1, 1, 0)
+	$Stage/Deck.position = Vector2(820, 560)
+	$Stage/Deck.scale = Vector2(0.10, 0.10)
+	_tween_prop($Stage/Deck, "modulate:a", 0.0, 1.0, 0.7, 0.15)
+	_tween_prop($Stage/Deck, "position", Vector2(820, 560), Vector2(820, 520), 0.9, 0.15)
+
+	_dust.position = Vector2(760, 592)
+	_dust.restart()
+	_dust.emitting = true
+
+	_set_subtitle(1)
+	$Tween.start()
+
+func _beat_cards():
+	_tween_prop($Stage, "scale", $Stage.scale, Vector2.ONE, 0.8)
+	_tween_prop($Stage, "position", $Stage.position, Vector2.ZERO, 0.8)
+
+	$Stage/Scroll.visible = true
+	$Stage/Scroll.modulate = Color(0.85, 0.77, 0.63, 1)
+	$Stage/Scroll.position = Vector2(540, 430)
+	$Stage/Scroll.scale = Vector2(0.32, 0.02)
+	_tween_prop($Stage/Scroll, "scale", Vector2(0.32, 0.02), Vector2(0.32, 0.32), 0.7)
+	$Stage/Deck.visible = false
+
+	var xs = [330, 470, 610, 750]
+	var rots = [-6, -2, 2, 6]
+	for i in range(4):
+		var c = _cards[i]
+		c.visible = true
+		c.position = Vector2(xs[i], 455)
+		c.scale = Vector2(0.16, 0.16)
+		c.rotation = 0
+		c.modulate = Color(1, 1, 1, 0)
+		_tween_prop(c, "modulate:a", 0.0, 1.0, 0.6, 0.12 * i)
+		_tween_prop(c, "position", Vector2(xs[i], 455), Vector2(xs[i], 425), 0.8, 0.12 * i)
+		_tween_prop(c, "rotation", 0.0, deg2rad(rots[i]), 0.8, 0.12 * i)
+
+	_set_subtitle(2)
+	$Tween.start()
+
+func _beat_hand():
+	_snow.emitting = false
+	_tween_prop(_snow, "modulate:a", 1.0, 0.0, 1.0)
+	_set_subtitle(3)
+	for i in range(4):
+		var c = _cards[i]
+		_tween_prop(c, "position", c.position, Vector2(540, 640), 0.7, 0.06 * i)
+		_tween_prop(c, "scale", c.scale, Vector2(0.05, 0.05), 0.7, 0.06 * i)
+		_tween_prop(c, "modulate:a", 1.0, 0.0, 0.5, 0.15 + 0.06 * i)
+	_tween_prop($Stage/Scroll, "modulate:a", 1.0, 0.0, 0.5)
+
+	$Title.visible = true
+	$Title.modulate = Color(1, 1, 1, 0)
+	$Title.rect_scale = Vector2(0.92, 0.92)
+	_tween_prop($Title, "modulate:a", 0.0, 1.0, 0.9, 0.25)
+	_tween_prop($Title, "rect_scale", Vector2(0.92, 0.92), Vector2.ONE, 0.9, 0.25)
+	$Tween.start()
+
+func _start_quick():
+	_quick = true
+	_beat = -1
+	_beat_elapsed = 0.0
+	$Stage.visible = false
+	$Stage/Scroll.visible = false
+	$Stage/Deck.visible = false
+	_snow.emitting = false
+	$Title.visible = true
+	$Title.modulate = Color(1, 1, 1, 0)
+	$Title.rect_scale = Vector2(0.94, 0.94)
+	_tween_prop($Title, "modulate:a", 0.0, 1.0, 0.8)
+	_tween_prop($Title, "rect_scale", Vector2(0.94, 0.94), Vector2.ONE, 0.8)
+	_set_subtitle(3)
+	$Tween.start()
+
+# ---------------- 辅助 ----------------
+
+func _tween_prop(obj, prop, from_value, to_value, dur, delay = 0.0, trans_type = Tween.TRANS_CUBIC, ease_type = Tween.EASE_OUT):
+	$Tween.interpolate_property(obj, prop, from_value, to_value, dur, trans_type, ease_type, delay)
+
+func _set_subtitle(index):
+	$Subtitle.text = SUBTITLES[index]
+	$SubtitleBg.visible = true
+	$Subtitle.visible = true
+	$SubtitleBg.modulate = Color(1, 1, 1, 0)
+	$Subtitle.modulate = Color(1, 1, 1, 0)
+	_tween_prop($SubtitleBg, "modulate:a", 0.0, 0.85, 0.5)
+	_tween_prop($Subtitle, "modulate:a", 0.0, 1.0, 0.5)
+
+func _show_skip_hint():
+	$SkipHint.modulate = Color(1, 1, 1, 1)
+	_tween_prop($SkipHint, "modulate:a", 1.0, 0.0, 0.8, 5.0)
+
+func _build_fx():
+	_snow = CPUParticles2D.new()
+	_snow.name = "Snow"
+	_snow.texture = load("res://seasons/fx/snow.png")
+	_snow.amount = 60
+	_snow.lifetime = 9.0
+	_snow.preprocess = 6.0
+	_snow.local_coords = false
+	_snow.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	_snow.emission_rect_extents = Vector2(620, 8)
+	_snow.position = Vector2(540, -10)
+	_snow.direction = Vector2(0, 1)
+	_snow.spread = 18.0
+	_snow.gravity = Vector2(10, 26)
+	_snow.initial_velocity = 24.0
+	_snow.initial_velocity_random = 0.6
+	_snow.scale_amount = 1.1
+	_snow.scale_amount_random = 0.6
+	_snow.color = Color(0.94, 0.97, 1.0, 0.9)
+	_snow.emitting = false
+	$FX.add_child(_snow)
+
+	_dust = CPUParticles2D.new()
+	_dust.name = "Dust"
+	_dust.texture = load("res://seasons/fx/dust.png")
+	_dust.amount = 26
+	_dust.lifetime = 1.3
+	_dust.one_shot = true
+	_dust.local_coords = false
+	_dust.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
+	_dust.emission_sphere_radius = 26.0
+	_dust.direction = Vector2(0, -1)
+	_dust.spread = 55.0
+	_dust.gravity = Vector2(0, -14)
+	_dust.initial_velocity = 46.0
+	_dust.initial_velocity_random = 0.7
+	_dust.scale_amount = 2.0
+	_dust.scale_amount_random = 0.8
+	_dust.color = Color(0.72, 0.62, 0.5, 0.8)
+	_dust.emitting = false
+	$FX.add_child(_dust)
+
+func _has_seen():
+	var f = File.new()
+	if not f.file_exists(SEEN_PATH):
+		return false
+	if f.open(SEEN_PATH, File.READ) != OK:
+		return false
+	var data = parse_json(f.get_as_text())
+	f.close()
+	return typeof(data) == TYPE_DICTIONARY and bool(data.get("seen", false))
+
+func _mark_seen():
+	var f = File.new()
+	if f.open(SEEN_PATH, File.WRITE) == OK:
+		f.store_string(to_json({"seen": true}))
+		f.close()

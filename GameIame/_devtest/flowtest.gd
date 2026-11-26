@@ -1,6 +1,6 @@
 extends Node2D
 
-# 端到端入口链路测试：主菜单 -> 点「开始游戏」-> Intro -> 点按钮 -> Game
+# 端到端入口链路测试：主菜单 -> 点「开始游戏」-> Intro -> 结束 -> Game
 # 与 autotest 分开跑：change_scene 会释放 current_scene，所以本节点先把自己摘出来。
 
 const LOG_PATH = "D:/aigame/_shots/flowtest.txt"
@@ -52,8 +52,9 @@ func _ready():
 		finish()
 		return
 
-	say("[F] intro: btn=" + str(cur.get_node_or_null("Button")) + " has_method=" + str(cur.has_method("_on_Button_pressed")))
-	cur._on_Button_pressed()
+	say("[F] intro: has_finish=" + str(cur.has_method("_finish")))
+	if cur.has_method("_finish"):
+		cur._finish()
 	var st = get_node("/root/SceneTransitions")
 	say("[F] after click: next=" + str(st.next) + " playing=" + str(st.get_node("AnimationPlayer").is_playing()))
 	for i in range(120):
