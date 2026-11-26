@@ -52,7 +52,9 @@ func _ready():
 	yield(check_win_ui(), "completed")
 	yield(check_bug_waves(), "completed")
 	check_win_card_gate()
+	check_p3_values()
 	yield(check_starter_deck(), "completed")
+	check_harvest_queue()
 
 	say("=== AUTOTEST DONE ===")
 	logfile.close()
@@ -315,6 +317,35 @@ func check_win_card_gate():
 	say("[T] 金稻门槛 葡萄第2次: " + str(has_win_card_in(CardCreation.pick_plant3_cards(3))))
 
 	CardCreation.reset_all_state()
+
+func check_p3_values():
+	say("[T] 掐枝保穗伤害 = " + str(GS.card_sacrif1_1enem.quantity) + "（期望 3）")
+	var old_tier = DifficultyManager.current_tier
+	var saved_gold = GS.gold
+	DifficultyManager.set_tier(4)
+	GS.gold = 20
+	say("[T] 大暑修渠 tier4: paid=" + str(GS.apply_midrun_cost()) + " gold=" + str(GS.gold))
+	DifficultyManager.set_tier(1)
+	GS.gold = 2
+	say("[T] 大暑修渠 tier1 低存银: paid=" + str(GS.apply_midrun_cost()) + " gold=" + str(GS.gold))
+	GS.gold = saved_gold
+	DifficultyManager.set_tier(old_tier)
+
+func check_harvest_queue():
+	GS.selection_queue.clear()
+	GS.waiting_for_card_selection = false
+	var pool = [GS.card_basic_plant, GS.card_small_attack, GS.card_free_1x1_water]
+	GS.popup_card_selection(pool, 1)
+	var first_lv = GS.card_selector_ui.current_plant_level
+	GS.popup_card_selection(pool, 2)
+	say("[T] 收获队列: 首项 lv=" + str(first_lv) + " 排队=" + str(GS.selection_queue.size()) + " waiting=" + str(GS.waiting_for_card_selection))
+	GS.resolve_selection()
+	say("[T] 收获队列: 次项 lv=" + str(GS.card_selector_ui.current_plant_level) + " waiting=" + str(GS.waiting_for_card_selection))
+	GS.resolve_selection()
+	say("[T] 收获队列: 清空 waiting=" + str(GS.waiting_for_card_selection))
+	GS.card_selector_ui.get_parent().hide()
+	GS.card_selector_ui.is_settlement = false
+	GS.selection_queue.clear()
 
 func check_starter_deck():
 	for c in GS.hand.get_children():

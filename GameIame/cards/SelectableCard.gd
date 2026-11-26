@@ -67,5 +67,6 @@ func _physics_process(delta):
 
 func destroy_card_child():
 	if is_instance_valid(card_child):
+		remove_child(card_child)
 		card_child.queue_free()
 		card_child = null

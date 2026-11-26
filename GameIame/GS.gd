@@ -46,6 +46,8 @@ var CardTexSeed = preload("res://cards/card_seeds.svg")
 
 var turn_state = TurnState.UNDEFINED
 var waiting_for_card_selection = false
+# 同一候可能有多株成熟，或胜利/结算与收获同候触发：统一排队，避免面板互相覆盖丢奖励。
+var selection_queue = []
 
 var card_selector_ui = null
 var gold = 0
@@ -64,20 +66,54 @@ var new_cards_mouse = false
 var end_turn_mouse = false
 
 func popup_card_selection(card_set: Array, plant_level = 1):
-	current_harvest_plant_level = plant_level
-	waiting_for_card_selection = true
-	card_selector_ui.setup_cards(card_set, plant_level)
-	card_selector_ui.popup()
+	enqueue_selection({"kind": "harvest", "cards": card_set, "level": plant_level})
 	
 func popup_card_winner():
-	waiting_for_card_selection = true
-	card_selector_ui.setup_win()
-	card_selector_ui.popup()
+	enqueue_selection({"kind": "win"})
 
 func popup_tax_settlement(passed: bool, current_gold: int, target_tax: int):
+	enqueue_selection({"kind": "tax", "passed": passed, "gold": current_gold, "tax": target_tax})
+
+func enqueue_selection(item: Dictionary):
+	selection_queue.push_back(item)
+	if not waiting_for_card_selection:
+		show_next_selection()
+
+func show_next_selection():
+	if selection_queue.empty():
+		waiting_for_card_selection = false
+		return
+	var item = selection_queue.pop_front()
 	waiting_for_card_selection = true
-	card_selector_ui.setup_tax_settlement(passed, current_gold, target_tax)
+	if item["kind"] == "harvest":
+		current_harvest_plant_level = item["level"]
+		card_selector_ui.setup_cards(item["cards"], item["level"])
+	elif item["kind"] == "win":
+		card_selector_ui.setup_win()
+	else:
+		card_selector_ui.setup_tax_settlement(item["passed"], item["gold"], item["tax"])
 	card_selector_ui.popup()
+
+# 当前面板处理完：还有排队项就继续，返回是否还有下一项。
+func resolve_selection():
+	if selection_queue.empty():
+		waiting_for_card_selection = false
+		return false
+	show_next_selection()
+	return true
+
+func _settle_after_animations():
+	yield(get_tree().create_timer(0.9), "timeout")
+	popup_tax_settlement(gold >= tax_amount, gold, tax_amount)
+
+# 第 12 候大暑修渠：给中段一个强制金币出口，避免全程囤积
+func apply_midrun_cost() -> int:
+	var cost = DifficultyManager.get_midrun_cost()
+	var paid = min(gold, cost)
+	gold -= paid
+	if paid > 0:
+		SeasonManager.show_banner("【大暑修渠】烈日灼田，雇工修渠耗去 " + str(paid) + " 两银，存银 " + str(gold) + " 两")
+	return paid
 
 class Card:
 	var title: String
@@ -330,7 +366,7 @@ var card_sacrif1_1enem : Card = Card.new(
 	"忍痛掐去病叶消耗 1 点作物生命，聚力重创残血害虫造成 $DQ 点伤害",
 	1,
 	Action.SACRIF
-).with_quantity(4).with_drain(1).with_mult(1).with_cat(CAT_ATK).with_icon(preload("res://cards/icons/blood_dagger.svg"))
+).with_quantity(3).with_drain(1).with_mult(1).with_cat(CAT_ATK).with_icon(preload("res://cards/icons/blood_dagger.svg"))
 
 # Medium attack cards
 
@@ -745,10 +781,14 @@ func deal_new_hand():
 	if not tutorial and not game_settled:
 		current_turn += 1
 		SeasonManager.update_season_for_turn(current_turn)
+		# 中期金币出口：第 12 候大暑修渠，按品级强制支出
+		if current_turn == 12:
+			apply_midrun_cost()
 		if current_turn > max_turns:
 			game_settled = true
 			turn_state = TurnState.UNDEFINED
-			popup_tax_settlement(gold >= tax_amount, gold, tax_amount)
+			# 先等本候成熟的作物/金稻把面板排进队列，再弹完税结算，避免结算面板盖掉收获或传奇胜利
+			_settle_after_animations()
 			return
 	
 	for i in range(0, card_draw_count):
@@ -797,6 +837,7 @@ func reset_all_state():
 	
 	turn_state = TurnState.UNDEFINED
 	waiting_for_card_selection = false
+	selection_queue = []
 
 	card_selector_ui = null
 	# 一品·神农绝境 有乡邻接济的起始存银

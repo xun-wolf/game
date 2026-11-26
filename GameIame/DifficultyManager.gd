@@ -69,6 +69,7 @@ const TIER_DATA = {
 		"drought_first": 0,
 		"drought_last": 0,
 		"king_turns": [],
+		"midrun_cost": 3,
 		"desc": "岁赋 18 两 | 虫害温和，四候一波",
 		"win_praise": "岁丰年稔，草木茂盛，深谙田园农道！"
 	},
@@ -84,6 +85,7 @@ const TIER_DATA = {
 		"drought_first": 0,
 		"drought_last": 0,
 		"king_turns": [],
+		"midrun_cost": 4,
 		"desc": "岁赋 24 两 | 一候一两银，虫潮三候渐紧",
 		"win_praise": "苛赋沉重，仍能精打细算、如数完税，功昭乡梓！"
 	},
@@ -99,6 +101,7 @@ const TIER_DATA = {
 		"drought_first": 0,
 		"drought_last": 0,
 		"king_turns": [],
+		"midrun_cost": 6,
 		"desc": "岁赋 24 两 | 凶虫三候一波，后期虫王游荡",
 		"win_praise": "力斩群害，守土护稼，堪称田垄中流砥柱！"
 	},
@@ -114,6 +117,7 @@ const TIER_DATA = {
 		"drought_first": 10,
 		"drought_last": 12,
 		"king_turns": [21],
+		"midrun_cost": 6,
 		"start_gold": 6,
 		"desc": "岁赋 24 两 | 虫王 21 候压阵 + 大暑 10-12 候双倍水；接济 6 两",
 		"win_praise": "抗旱排难，善构水利，挽救田庄于绝境！"
@@ -130,6 +134,7 @@ const TIER_DATA = {
 		"drought_first": 10,
 		"drought_last": 14,
 		"king_turns": [18, 21],
+		"midrun_cost": 8,
 		"start_gold": 6,
 		"desc": "岁赋 32 两 | 虫王 18/21 候来袭 + 长旱 10-14 候双倍水；接济 6 两",
 		"win_praise": "绝境登神，光耀华夏，创万世不拔之基业！"
@@ -185,6 +190,11 @@ func get_tier_desc(t: int = -1) -> String:
 func get_start_gold(t: int = -1) -> int:
 	var key = current_tier if t == -1 else t
 	return int(TIER_DATA[key].get("start_gold", 0))
+
+# 第 12 候「大暑修渠」的强制支出，按品级递增
+func get_midrun_cost(t: int = -1) -> int:
+	var key = current_tier if t == -1 else t
+	return int(TIER_DATA[key]["midrun_cost"])
 
 func get_win_praise(t: int = -1) -> String:
 	var key = current_tier if t == -1 else t

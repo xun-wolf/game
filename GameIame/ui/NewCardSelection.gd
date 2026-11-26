@@ -89,6 +89,7 @@ func _show_selection_ui(on: bool):
 func setup_cards(cards: Array, plant_level = 1):
 	is_settlement = false
 	current_plant_level = plant_level
+	deselect_all()
 	var gold_val = get_gold_for_level(plant_level)
 
 	_show_selection_ui(true)
@@ -210,9 +211,9 @@ func _on_ConfirmButton_pressed():
 		var gold_val = get_gold_for_level(current_plant_level)
 		GS.gold += gold_val
 	
-	GS.waiting_for_card_selection = false
-	
-	$AnimationPlayer.play("Popdown")
+	# 同候还有其它成熟作物时切换到下一株，否则收起面板
+	if not GS.resolve_selection():
+		$AnimationPlayer.play("Popdown")
 	
 func remove_card_children():
 	$Cards/Card.destroy_card_child()
