@@ -20,6 +20,12 @@ var consumed = false
 
 var spawn_sfx_timer = 0.15
 
+var pips = []
+var pip_row: Control
+var hover_area: Control
+var mature_tween: Tween
+var last_tip = ""
+
 func nowater_sfx():
 	SFX.no_water.play_sfx()
 
@@ -27,13 +33,98 @@ func _ready():
 	if GS.auto_water:
 		water = 1
 	
-	$Plant.frames = anim_frames
+	if anim_frames != null:
+		$Plant.frames = anim_frames
 	$Plant.scale = Vector2(plant_scale, plant_scale)
 	
 	heart_update()
 	defense_update()
 	water_update()
 	
+	_build_growth_ui()
+	refresh_growth()
+
+func _get_frames():
+	if anim_frames != null:
+		return anim_frames
+	return $Plant.frames
+
+# 阶段点：横排在植株右上角，亮起的点数表示当前生长到第几阶段。
+func _build_growth_ui():
+	var frames = _get_frames()
+	if frames == null:
+		return
+	var total = frames.get_frame_count("default")
+	if total <= 0:
+		return
+	var step = 8
+	var width = total * step - 1
+	pip_row = Control.new()
+	pip_row.name = "GrowthPips"
+	pip_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pip_row.rect_position = Vector2(112 - width, 18)
+	add_child(pip_row)
+	for i in range(total):
+		var bg = ColorRect.new()
+		bg.rect_position = Vector2(i * step, 0)
+		bg.rect_size = Vector2(7, 7)
+		bg.color = Color(0.08, 0.06, 0.05, 0.75)
+		bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		pip_row.add_child(bg)
+		var fill = ColorRect.new()
+		fill.rect_position = Vector2(i * step + 1, 1)
+		fill.rect_size = Vector2(5, 5)
+		fill.color = Color(0.93, 0.78, 0.34, 1.0)
+		fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		pip_row.add_child(fill)
+		pips.append(fill)
+	
+	hover_area = Control.new()
+	hover_area.name = "GrowthHover"
+	hover_area.rect_position = Vector2(16, 16)
+	hover_area.rect_size = Vector2(96, 96)
+	hover_area.mouse_filter = Control.MOUSE_FILTER_PASS
+	add_child(hover_area)
+
+func refresh_growth():
+	var frames = _get_frames()
+	if frames == null or pips.size() == 0:
+		return
+	var total = frames.get_frame_count("default")
+	var idx = $Plant.frame
+	for i in range(pips.size()):
+		var lit = i <= idx
+		pips[i].color = Color(0.93, 0.78, 0.34, 1.0) if lit else Color(0.35, 0.3, 0.24, 0.9)
+	if idx >= total - 1:
+		_start_mature_glow()
+	_refresh_tooltip()
+
+func _refresh_tooltip():
+	var frames = _get_frames()
+	if frames == null or hover_area == null:
+		return
+	var total = frames.get_frame_count("default")
+	var remain = total - 1 - $Plant.frame
+	var tip = "已成熟，可收获"
+	if remain > 0:
+		tip = "还需 %d 次浇水 · 共需 %d 水" % [remain, remain * SeasonManager.water_cost_per_stage()]
+	if tip != last_tip:
+		last_tip = tip
+		hover_area.hint_tooltip = tip
+
+func _start_mature_glow():
+	if mature_tween != null:
+		return
+	var base_scale = Vector2(plant_scale, plant_scale)
+	mature_tween = Tween.new()
+	add_child(mature_tween)
+	mature_tween.interpolate_property($Plant, "modulate", Color(1, 1, 1), Color(1.0, 0.78, 0.42), 0.8, Tween.TRANS_SINE, Tween.EASE_IN_OUT, 0.0)
+	mature_tween.interpolate_property($Plant, "modulate", Color(1.0, 0.78, 0.42), Color(1, 1, 1), 0.8, Tween.TRANS_SINE, Tween.EASE_IN_OUT, 0.8)
+	mature_tween.interpolate_property($Plant, "scale", base_scale, base_scale * 1.05, 0.8, Tween.TRANS_SINE, Tween.EASE_IN_OUT, 0.0)
+	mature_tween.interpolate_property($Plant, "scale", base_scale * 1.05, base_scale, 0.8, Tween.TRANS_SINE, Tween.EASE_IN_OUT, 0.8)
+	mature_tween.set_repeat(true)
+	mature_tween.start()
+
 
 func centered_lpf_noise(in_pos):
 	var r = rand_range(0, 32)
@@ -62,6 +153,8 @@ func update_display():
 	#$H/HeartMarker/HealthNum.text = String(health)
 	#$W/WaterMarker/WaterNum.text = String(water)
 	#$D/DefenseMarker/DefenseNum.text = String(defense)
+	
+	_refresh_tooltip()
 	
 	# Don't update visibility while the animation is going...?
 	if not $AnimationPlayer.is_playing():
@@ -187,6 +280,7 @@ func popup_menu():
 	
 func upgrade_plant():
 	$Plant.frame += 1
+	refresh_growth()
 	
 func turn_over():
 	# If we are being polled about our turn, then the card selection
