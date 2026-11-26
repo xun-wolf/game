@@ -9,7 +9,7 @@ var lines = [
 ,"你应该把一张【初耕·小白菜】种在翻好的土地上。左键点击手牌中的种子卡牌，然后把它拖到上方的垄田中即可打出。\n\n这张卡牌会用绿色旋转圆圈标出可以耕种的位置。"
 ,"播种之后，你会注意到一个重要细节：每株作物都有生命值。务必悉心呵护，让它长到成熟！"
 ,"现在，你需要给作物补充水分。使用【晨露清沥】卡牌为你的作物浇水。"
-,"注意，每株作物都有水分指示。每当农作回合结束，地力水分都会消耗 1 点。若作物缺水受旱，便会折损生命！\n\n遇上「百年大旱」这类年份（三品、一品），大暑前后（第 10-12 候）每长一阶段要多耗 1 点水，浇水要算准。"
+,"注意，每株作物都有水分指示。每当农作回合结束，地力水分都会消耗 1 点。若作物缺水受旱，便会折损生命！\n\n遇上「百年大旱」这类年份，旱期每长一阶段要多耗 1 点水：三品在第 10-12 候，一品更长（第 10-14 候），浇水要算准。"
 ,"作物的最后一项属性是免疫值，你可以用【细密防虫网】卡牌以及其他手段施加防护。"
 ,"每 1 点免疫能抵御 1 点伤害。不过，作物的免疫值会在回合开始时消退 1 点。\n\n作物的各项属性上限均为 10 点。"
 ,"现在，打出可用卡牌后，点击右下角“结束回合”推移时令。你会看到水分滋润作物的生机……若田间有料想之外的害虫，它们也会在此刻偷袭作物！"
@@ -54,7 +54,6 @@ func tutorial_skip():
 	tutorial_cards()
 	GS.draw_card_to_hand()
 	GS.draw_card_to_hand()
-	GS.no_enemy_turns = 2
 	end_tutorial()
 	GS.turn_state = GS.TurnState.PLAYING_CARDS
 
@@ -143,13 +142,9 @@ func tutorial_cards():
 	GS.draw_pile.push_back(GS.card_water2_1x1)
 	
 	GS.discard_pile.push_back(GS.card_buy_1x1_water)
-	# 第二张「水桶重灌」：水牌从 3/9 提到 4/10，抽 5 张时水量更稳
+	# 第二张「水桶重灌」：水牌从 3/8 提到 4/9，抽 5 张时水量更稳
 	GS.discard_pile.push_back(GS.card_water2_1x1)
 	#GS.discard_pile.push_back(GS.card_buy_1x1_water)
-	
-	GS.discard_pile.push_back(GS.card_high_plant)
-	#GS.discard_pile.push_back(GS.card_high_plant)
-	
 	
 	GS.discard_pile.push_back(GS.card_small_attack)
 	#GS.discard_pile.push_back(GS.card_small_attack)

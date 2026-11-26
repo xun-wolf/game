@@ -529,7 +529,7 @@
           <option value="t2">七品 · 苛捐杂税（岁赋 24 两）</option>
           <option value="t3">五品 · 凶虫肆虐（岁赋 24 两 · 双虫）</option>
           <option value="t4">三品 · 百年大旱（岁赋 24 两 · 虫 + 大暑旱）</option>
-          <option value="t5">一品 · 神农绝境（岁赋 30 两 · 虫 + 旱 · 接济 6 两）</option>
+          <option value="t5">一品 · 神农绝境（岁赋 32 两 · 虫 + 旱 · 接济 6 两）</option>
         </select>
         <button onclick="initGame()" class="btn-link">重开新局</button>
       </div>
@@ -630,7 +630,7 @@
     const CROPS = {
       cabbage:  { name: "小白菜", icon: "🥬", grow: 3, hp: 7, level: 1, gold: 3 },
       tomato:   { name: "红番茄", icon: "🍅", grow: 5, hp: 5, level: 2, gold: 6 },
-      grape:    { name: "紫葡萄", icon: "🍇", grow: 5, hp: 5, level: 3, gold: 15 },
+      grape:    { name: "紫葡萄", icon: "🍇", grow: 5, hp: 5, level: 3, gold: 12 },
       goldrice: { name: "金稻",   icon: "🌾", grow: 8, hp: 4, level: 4, gold: 0 }
     };
 
@@ -644,7 +644,7 @@
             desc: "凶虫横行，开局即有双虫袭扰", praise: "力斩群害，守土护稼，堪称田垄中流砥柱！" },
       t4: { rank: "三品", name: "百年大旱", tax: 24, gold: 6, bugs: 2, drought: true,
             desc: "凶虫袭扰 + 大旱；乡邻接济，开局多 6 两", praise: "抗旱排难，善构水利，挽救田庄于绝境！" },
-      t5: { rank: "一品", name: "神农绝境", tax: 30, gold: 6, bugs: 2, drought: true,
+      t5: { rank: "一品", name: "神农绝境", tax: 32, gold: 6, bugs: 2, drought: true,
             desc: "苛政 + 大旱 + 凶虫；乡邻接济，开局多 6 两", praise: "绝境登神，光耀华夏，创万世不拔之基业！" }
     };
 

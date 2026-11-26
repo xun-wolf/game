@@ -75,7 +75,7 @@ func get_gold_for_level(level: int) -> int:
 	elif level == 2:
 		return 6
 	elif level == 3:
-		return 15
+		return 12
 	return 3
 
 func _show_selection_ui(on: bool):

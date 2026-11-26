@@ -50,6 +50,8 @@ func _ready():
 	yield(run_settlement(), "completed")
 	yield(run_turn_loop(), "completed")
 	yield(check_win_ui(), "completed")
+	yield(check_bug_waves(), "completed")
+	check_win_card_gate()
 	yield(check_starter_deck(), "completed")
 
 	say("=== AUTOTEST DONE ===")
@@ -67,7 +69,11 @@ func check_autoloads():
 	say("[T] initial: tier=" + str(DifficultyManager.current_tier) + " tax=" + str(GS.tax_amount) + " max_turns=" + str(GS.max_turns) + " hard=" + str(Flags.hard_mode))
 	for t in range(1, 6):
 		DifficultyManager.set_tier(t)
-		say("[T] tier " + str(t) + " | tax=" + str(GS.tax_amount) + " | turns=" + str(GS.max_turns) + " | bug_wave=" + str(DifficultyManager.get_start_bug_wave()) + " | severe_drought=" + str(DifficultyManager.is_summer_drought()) + " | hard=" + str(Flags.hard_mode))
+		say("[T] tier " + str(t) + " | tax=" + str(GS.tax_amount) + " | turns=" + str(GS.max_turns) + " | buy_in=" + str(DifficultyManager.get_start_gold()) +
+			" | bug=" + DifficultyManager.get_bug_profile_name() + "/" + str(DifficultyManager.get_bug_first_turn()) + "候/" + str(DifficultyManager.get_bug_interval()) + "候一波" +
+			" | king=" + str(DifficultyManager.get_bug_king_turns()) +
+			" | drought=" + str(DifficultyManager.get_drought_first()) + "-" + str(DifficultyManager.get_drought_last()) +
+			" | hard=" + str(Flags.hard_mode))
 	DifficultyManager.set_tier(1)
 	DifficultyManager.set_tier(5)
 	GS.reset_all_state()
@@ -89,8 +95,10 @@ func check_water_rule():
 		var summer_mid = SeasonManager.water_cost_per_stage()
 		GS.current_turn = 11
 		var summer_peak = SeasonManager.water_cost_per_stage()
+		GS.current_turn = 13
+		var autumn_start = SeasonManager.water_cost_per_stage()
 		say("[T] tier " + str(t) + " 每阶段耗水: 其他季=" + str(spring_cost) +
-			" 夏初(第8候)=" + str(summer_mid) + " 大暑(第11候)=" + str(summer_peak))
+			" 夏初(第8候)=" + str(summer_mid) + " 大暑(第11候)=" + str(summer_peak) + " 秋初(第13候)=" + str(autumn_start))
 	DifficultyManager.set_tier(1)
 	SeasonManager.apply_season(0, false)
 	GS.current_turn = saved_turn
@@ -207,6 +215,107 @@ func check_win_ui():
 	for i in range(3):
 		yield(get_tree(), "idle_frame")
 
+func check_bug_waves():
+	# 新虫潮：按候推进 + 按候段权重 + 第 21 候虫王（三品/一品）
+	var old_tier = DifficultyManager.current_tier
+	var old_turn = GS.current_turn
+
+	# 三维矩阵：虫潮档位 / 虫王候 / 旱情窗口
+	for t in [1, 2, 3, 4, 5]:
+		say("[T] tier " + str(t) + " bug=" + DifficultyManager.get_bug_profile_name(t) +
+			" first=" + str(DifficultyManager.get_bug_first_turn(t)) +
+			" interval=" + str(DifficultyManager.get_bug_interval(t)) +
+			" size(6/21)=" + str(DifficultyManager.get_bug_wave_size(6, t)) + "/" + str(DifficultyManager.get_bug_wave_size(21, t)) +
+			" pool(21)=" + str(DifficultyManager.get_bug_wave_pool(21, t)) +
+			" kings=" + str(DifficultyManager.get_bug_king_turns(t)) +
+			" drought=" + str(DifficultyManager.get_drought_first(t)) + "-" + str(DifficultyManager.get_drought_last(t)))
+
+	DifficultyManager.set_tier(4)
+
+	var plant = GS.Plant1.instance()
+	plant.position = Vector2(-256, -192)
+	GS.tilemap.add_child(plant)
+	yield(get_tree(), "idle_frame")
+
+	for turn in [3, 6, 9, 12, 15, 18, 21]:
+		for e in get_tree().get_nodes_in_group("Enemy"):
+			e.free()
+		GS.waves_since_strong = 0
+		GS.current_turn = turn
+		GS.spawn_enemies()
+		var hp = []
+		var king = 0
+		for e in get_tree().get_nodes_in_group("Enemy"):
+			hp.append(e.health)
+			if e.tier == 4:
+				king += 1
+		say("[T] wave turn " + str(turn) + " -> hp=" + str(hp) + " king=" + str(king))
+
+	# 一品：第 18 候与第 21 候固定虫王
+	DifficultyManager.set_tier(5)
+	for turn in [18, 21]:
+		for e in get_tree().get_nodes_in_group("Enemy"):
+			e.free()
+		GS.current_turn = turn
+		GS.spawn_enemies()
+		var k = 0
+		var hp5 = []
+		for e in get_tree().get_nodes_in_group("Enemy"):
+			hp5.append(e.health)
+			if e.tier == 4:
+				k += 1
+		say("[T] tier5 king wave " + str(turn) + " -> hp=" + str(hp5) + " king=" + str(k))
+
+	# 低品级对照：九品在第 12 候只应出现 2/3 血虫
+	DifficultyManager.set_tier(1)
+	for e in get_tree().get_nodes_in_group("Enemy"):
+		e.free()
+	GS.current_turn = 12
+	GS.waves_since_strong = 0
+	GS.spawn_enemies()
+	var low_hp = []
+	for e in get_tree().get_nodes_in_group("Enemy"):
+		low_hp.append(e.health)
+	say("[T] tier1 wave turn 12 -> hp=" + str(low_hp))
+
+	# 保底：连续 3 波没有强虫时，本波强制一只 5 血
+	for e in get_tree().get_nodes_in_group("Enemy"):
+		e.free()
+	GS.current_turn = 12
+	GS.waves_since_strong = 3
+	GS.spawn_enemies()
+	var forced = false
+	for e in get_tree().get_nodes_in_group("Enemy"):
+		if e.health >= 5:
+			forced = true
+	say("[T] pity wave -> strong=" + str(forced))
+
+	for e in get_tree().get_nodes_in_group("Enemy"):
+		e.free()
+	plant.queue_free()
+	GS.current_turn = old_turn
+	DifficultyManager.set_tier(old_tier)
+	yield(get_tree(), "idle_frame")
+
+func has_win_card_in(cards: Array) -> bool:
+	for c in cards:
+		if c == GS.card_win_plant:
+			return true
+	return false
+
+func check_win_card_gate():
+	CardCreation.reset_all_state()
+	CardCreation.plant1_times = 4
+	say("[T] 金稻门槛 小白菜第5次: " + str(has_win_card_in(CardCreation.pick_plant1_cards(7))))
+	CardCreation.plant1_times = 5
+	say("[T] 金稻门槛 小白菜第6次: " + str(has_win_card_in(CardCreation.pick_plant1_cards(7))))
+
+	CardCreation.reset_all_state()
+	CardCreation.plant3_times = 1
+	say("[T] 金稻门槛 葡萄第2次: " + str(has_win_card_in(CardCreation.pick_plant3_cards(3))))
+
+	CardCreation.reset_all_state()
+
 func check_starter_deck():
 	for c in GS.hand.get_children():
 		GS.hand.remove_child(c)
@@ -233,6 +342,18 @@ func shot_menu():
 	yield(shot("40_menu"), "completed")
 	menu.queue_free()
 	yield(get_tree(), "idle_frame")
+
+	# 最长的三品/一品描述也要单独截一张，防止再次压到状态行
+	for t in [4, 5]:
+		DifficultyManager.set_tier(t)
+		var menu_t = load("res://MainMenu.tscn").instance()
+		get_tree().get_root().add_child(menu_t)
+		for i in range(25):
+			yield(get_tree(), "idle_frame")
+		yield(shot("4" + str(t) + "_menu_tier" + str(t)), "completed")
+		menu_t.queue_free()
+		yield(get_tree(), "idle_frame")
+	DifficultyManager.set_tier(1)
 
 func shot_shop():
 	var shop = get_node_or_null("Game/CanvasLayer/Shop")

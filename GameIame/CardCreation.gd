@@ -51,6 +51,24 @@ func pick_cards(set: Array):
 
 	return result
 
+# 传奇结局：任意一条收集线达标后，下一次收获的候选卡必定包含金稻。
+# 24 候一局里 16/6/3 的旧门槛不可达，这里按实际节奏重设。
+const WIN_AFTER_PLANT1 = 6
+const WIN_AFTER_PLANT2 = 3
+const WIN_AFTER_PLANT3 = 2
+
+func should_offer_win_card() -> bool:
+	if has_win_card:
+		return false
+	return plant1_times >= WIN_AFTER_PLANT1 \
+		or plant2_times >= WIN_AFTER_PLANT2 \
+		or plant3_times >= WIN_AFTER_PLANT3
+
+func ensure_win_card(result: Array) -> Array:
+	if should_offer_win_card() and not has_duplicate_card(result, GS.card_win_plant):
+		result[0] = GS.card_win_plant
+	return result
+
 func pick_plant1_cards(health):
 	var set = []
 	plant1_times += 1
@@ -87,11 +105,8 @@ func pick_plant1_cards(health):
 		add_atks(set, copies_rare, GS.card_sacrif2_2enem)
 		add_atks(set, copies_rare, GS.card_free_atk)
 	
-	if plant1_times >= 16 and not has_win_card:
-		set[randi() % set.size()] = GS.card_win_plant
-	
 	var result = pick_cards(set)
-	return result
+	return ensure_win_card(result)
 	
 var plant2_times = 0
 var plant1_times = 0
@@ -113,6 +128,10 @@ func pick_plant2_cards(health):
 	
 	add_copies(set, 8, GS.card_cards)
 	
+	# 紫葡萄种子不再随开局牌组发放：收获 1 次红番茄后进入卡池
+	if plant2_times >= 1:
+		add_copies(set, 4, GS.card_high_plant)
+	
 	if health > 2:
 		add_waters(set, 1, GS.card_water5)
 		add_waters(set, 1, GS.card_drain7_dmgall5)
@@ -124,11 +143,8 @@ func pick_plant2_cards(health):
 		add_atks(set, 1, GS.card_add1_cheap)
 		add_atks(set, 1, GS.card_sacrifice)
 	
-	if plant2_times >= 6 and not has_win_card:
-		set[randi() % set.size()] = GS.card_win_plant
-	
 	var result = pick_cards(set)
-	return result
+	return ensure_win_card(result)
 	
 var plant3_times = 0
 var has_win_card = false
@@ -187,12 +203,5 @@ func pick_plant3_cards(health):
 		
 		add_copies(set, 4, GS.card_cards)
 	
-	# Force the player to go through a couple plants first...
-	if plant3_times >= 3:
-		add_copies(set, 8, GS.card_win_plant)
-	
-	if plant3_times >= 3 and not has_win_card:
-		set[randi() % set.size()] = GS.card_win_plant
-	
 	var result = pick_cards(set)
-	return result
+	return ensure_win_card(result)

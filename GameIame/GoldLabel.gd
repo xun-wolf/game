@@ -21,7 +21,7 @@ func _process(delta):
 	var tier_tag = " [" + DifficultyManager.get_tier_short() + "]"
 	var drought_alert = ""
 	var water_cost = SeasonManager.water_cost_per_stage()
-	if SeasonManager.is_drought_active() and water_cost > 1:
+	if water_cost > 1:
 		drought_alert = " ·大旱" + String(water_cost) + "水"
 	
 	text = "存银: " + String(GS.gold) + " 两  |  岁赋: " + String(GS.tax_amount) + " 两" + tier_tag + "\n" + s_title + " · " + term + drought_alert + countdown_str

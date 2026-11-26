@@ -563,66 +563,75 @@ enum SpawnOpt {
 	Bug5,
 	Bug9
 }
-var spawn_1bug2 = [SpawnOpt.Bug2]
-var spawn_2bug2 = [SpawnOpt.Bug2, SpawnOpt.Bug2]
-var spawn_3bug2 = [SpawnOpt.Bug2, SpawnOpt.Bug2, SpawnOpt.Bug2]
-var spawn_2bug3 = [SpawnOpt.Bug3, SpawnOpt.Bug3]
-var spawn_3bug3 = [SpawnOpt.Bug3, SpawnOpt.Bug3, SpawnOpt.Bug3]
-var spawn_4bug3 = [SpawnOpt.Bug3, SpawnOpt.Bug3, SpawnOpt.Bug3, SpawnOpt.Bug3]
-var spawn_bug5 = [SpawnOpt.Bug5]
-var spawn_2bug5 = [SpawnOpt.Bug5, SpawnOpt.Bug5]
-var spawn_3bug_w5 = [SpawnOpt.Bug5, SpawnOpt.Bug3, SpawnOpt.Bug3]
-var spawn_bug9 = [SpawnOpt.Bug9, SpawnOpt.Bug2, SpawnOpt.Bug2]
-var spawn_5bug = [SpawnOpt.Bug5, SpawnOpt.Bug5, SpawnOpt.Bug3, SpawnOpt.Bug2, SpawnOpt.Bug2]
-var spawn_configs = [
-	spawn_1bug2,
-	spawn_1bug2,
-	spawn_1bug2,
-	spawn_2bug2,
-	spawn_2bug2,
-	spawn_2bug2,
-	spawn_2bug2,
-	spawn_3bug2,
-	spawn_2bug2,
-	spawn_2bug3,
-	spawn_2bug3,
-	spawn_3bug2,
-	spawn_2bug3,
-	spawn_3bug3,
-	spawn_2bug3,
-	spawn_2bug3,
-	spawn_4bug3,
-	spawn_2bug3,
-	spawn_bug5,
-	spawn_3bug3,
-	spawn_bug5,
-	spawn_2bug5,
-	spawn_3bug3,
-	spawn_2bug3,
-	spawn_3bug_w5,
-	spawn_3bug3,
-	spawn_2bug5,
-	spawn_3bug3,
-	spawn_bug9,
-	spawn_3bug3,
-	spawn_2bug3,
-	spawn_5bug,
-	spawn_3bug3,
-	spawn_3bug_w5,
-	spawn_2bug3
-]
+# 虫潮的节奏与波次池由 DifficultyManager 按品级配置，这里只负责抽取与落位。
+# 连续多波没有出过 5 血以上的虫时，下一波强制补一只，避免长时间“没虫”。
+var waves_since_strong = 0
 
-var next_spawn = 0
+func is_bug_wave_turn():
+	if tutorial or game_settled:
+		return false
+	if current_turn < DifficultyManager.get_bug_first_turn():
+		return false
+	if current_turn >= max_turns:
+		return false
+	return current_turn % DifficultyManager.get_bug_interval() == 0
+
+func is_bug_king_wave(turn):
+	return turn in DifficultyManager.get_bug_king_turns()
+
+# 池条目为 [虫血, 权重]，虫血 2/3/5/9 对应四档立绘。
+func roll_bug_hp(pool):
+	var total = 0
+	for entry in pool:
+		total += entry[1]
+	var r = randi() % total
+	for entry in pool:
+		r -= entry[1]
+		if r < 0:
+			return entry[0]
+	return pool[0][0]
+
+func bug_opt_for_hp(hp):
+	if hp == 2:
+		return SpawnOpt.Bug2
+	if hp == 3:
+		return SpawnOpt.Bug3
+	if hp == 5:
+		return SpawnOpt.Bug5
+	return SpawnOpt.Bug9
+
+# 在随机作物的附近找一格空地放虫，返回是否成功。
+func spawn_bug_at_plant(item, plants):
+	for attempt in range(0, 100):
+		var p = plants[randi() % plants.size()]
+		var x = (randi() % 5) - 2
+		var y = (randi() % 5) - 2
+		var pos = p.position + Vector2(x, y) * 128
+		if get_object_at_map_lcoord(pos) != null:
+			continue
+
+		var bug = Bug.instance()
+		bug.position = pos
+
+		# 立绘跟血量走：2/3/5/9 分别对应四档外观
+		if item == SpawnOpt.Bug2:
+			bug.tier = 1
+			bug.health = 2
+		if item == SpawnOpt.Bug3:
+			bug.tier = 2
+			bug.health = 3
+		if item == SpawnOpt.Bug5:
+			bug.tier = 3
+			bug.health = 5
+		if item == SpawnOpt.Bug9:
+			bug.tier = 4
+			bug.health = 9
+
+		tilemap.add_child(bug)
+		return true
+	return false
 	
 func spawn_enemies():
-	 # DEBUG
-	
-	var cfg = spawn_configs[next_spawn]
-	# TODO: Keep using "difficult" configs
-	next_spawn += 1
-	if next_spawn >= spawn_configs.size():
-		next_spawn = 11 - 2 # Allow some easy
-	
 	# Enemies are spawned near plants
 	var plants = get_tree().get_nodes_in_group("Plant")
 	
@@ -631,42 +640,43 @@ func spawn_enemies():
 		return
 	
 	var count_enemys = get_tree().get_nodes_in_group("Enemy").size()
+	var size = DifficultyManager.get_bug_wave_size(current_turn)
+	var plan = [] # 虫血列表
 	
-	# Three times
-	for item in cfg:
+	if is_bug_king_wave(current_turn):
+		# 虫王携小虫压阵
+		plan.append(9)
+		for i in range(max(size - 1, 1)):
+			plan.append(3)
+	else:
+		var pool = DifficultyManager.get_bug_wave_pool(current_turn)
+		var max_kings = DifficultyManager.get_bug_max_kings()
+		var kings = 0
+		for i in range(size):
+			var hp = roll_bug_hp(pool)
+			# 单波随机虫王不超过配置上限，超出降为 5 血
+			if hp == 9:
+				if kings >= max_kings:
+					hp = 5
+				else:
+					kings += 1
+			plan.append(hp)
+		# 保底：连续 3 波没出过 5 血以上的虫，本波强制一只
+		if waves_since_strong >= 3:
+			plan[0] = 5
+	
+	var strong_spawned = false
+	for hp in plan:
 		# Don't spawn more than 5 enemies at once
 		if count_enemys >= 5:
-			return
-		
-		# Try 100 times to spawn an enemy
-		for attempt in range(0, 100):
-			var p = plants[randi() % plants.size()]
-			var x = (randi() % 5) - 2
-			var y = (randi() % 5) - 2
-			var pos = p.position + Vector2(x, y) * 128
-			
-			var existing = get_object_at_map_lcoord(pos)
-			if existing == null:
-				var bug = Bug.instance()
-				bug.position = pos
-
-				# 立绘跟血量走：2/3/5/9 分别对应四档外观
-				if item == SpawnOpt.Bug2:
-					bug.tier = 1
-					bug.health = 2
-				if item == SpawnOpt.Bug3:
-					bug.tier = 2
-					bug.health = 3
-				if item == SpawnOpt.Bug5:
-					bug.tier = 3
-					bug.health = 5
-				if item == SpawnOpt.Bug9:
-					bug.tier = 4
-					bug.health = 9
-
-				tilemap.add_child(bug)
-				count_enemys += 1
-				break
+			break
+		if not spawn_bug_at_plant(bug_opt_for_hp(hp), plants):
+			continue
+		count_enemys += 1
+		if hp >= 5:
+			strong_spawned = true
+	
+	waves_since_strong = 0 if strong_spawned else waves_since_strong + 1
 	
 func end_turn():
 	# Must be in PLAYING_CARDS or WAITING_FOR_TUTORIAL state
@@ -678,12 +688,9 @@ func end_turn():
 	hand.clear_hand()
 	current_picked_up_card = null
 	
-	# You get 3 free turns between enemies...?
-	if no_enemy_turns >= 3 or some_enemy_turns >= 12:
+	# 每 3 候固定来一波虫，波次强度随候推进
+	if is_bug_wave_turn():
 		spawn_enemies()
-		# Give some bonus for fighting enemies
-		no_enemy_turns = -int(some_enemy_turns / 2)
-		some_enemy_turns = 0
 	
 	turn_state = TurnState.UPDATING
 	current_turns = turn_processor()
@@ -730,11 +737,6 @@ func draw_card_to_hand():
 var card_draw_count = 5
 		
 func deal_new_hand():
-	if get_tree().get_nodes_in_group("Enemy").empty():
-		no_enemy_turns += 1
-	else:
-		some_enemy_turns += 1
-	
 	TutorialSteps.mark_have_ended_turn()
 	
 	for plant in get_tree().get_nodes_in_group("Plant"):
@@ -784,12 +786,6 @@ func get_discard_pos():
 # Should this get reset?
 var tutorial = true
 
-# Number of turns without any enemies...
-# Enemies will be spawned regularly
-var no_enemy_turns = 0
-
-var some_enemy_turns = 0
-
 var auto_water = false
 	
 func reset_all_state():
@@ -834,9 +830,6 @@ func reset_all_state():
 	
 	card_draw_count = 5 # Will be set by tutorial
 	
-	no_enemy_turns = 0
-	some_enemy_turns = 0
-	
 	shop_open = false
 	upper_panel_mouse = false
 	tutorial_mouse = false
@@ -845,5 +838,5 @@ func reset_all_state():
 	
 	auto_water = false
 	
-	next_spawn = DifficultyManager.get_start_bug_wave()
+	waves_since_strong = 0
 

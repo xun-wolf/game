@@ -79,22 +79,14 @@ var last_announced_season = -1
 
 # --- 旱季耗水规则 ---
 # 基础：每推进一个生长阶段消耗 1 点水。
-# 只有三品·百年大旱 / 一品·神农绝境 会遇旱，且只在大暑前后（第 10-12 候）缺水，
-# 每阶段 2 点水；其余档位、其余时候都是 1 点。
-# （实玩反馈：整个夏天翻倍会把三品卡死在"永远浇不动"上。）
+# 旱情窗口由 DifficultyManager 按品级配置：三品 10-12 候、一品 10-14 候，
+# 窗口内每阶段 2 点水；其余档位、其余时候都是 1 点。
 const WATER_COST_BASE = 1
-const DROUGHT_FIRST_TURN = 10
-const DROUGHT_LAST_TURN = 12
-
-func is_drought_active() -> bool:
-	return current_season == Season.SUMMER
 
 func is_drought_turn() -> bool:
-	return (GS.current_turn >= DROUGHT_FIRST_TURN and GS.current_turn <= DROUGHT_LAST_TURN)
+	return DifficultyManager.is_drought_turn(GS.current_turn)
 
 func drought_bonus() -> int:
-	if not is_drought_active():
-		return 0
 	if not DifficultyManager.is_summer_drought():
 		return 0
 	return 1 if is_drought_turn() else 0

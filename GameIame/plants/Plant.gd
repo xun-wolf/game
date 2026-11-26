@@ -126,10 +126,10 @@ func _refresh_tooltip():
 		last_tip = tip
 		hover_area.hint_tooltip = tip
 
-# 按候推算单阶段耗水：大暑（第 10-12 候）在开启旱情的档位翻倍。
+# 按候推算单阶段耗水：旱情窗口内翻倍（三品 10-12 候、一品 10-14 候）。
 func _water_cost_at_turn(turn):
 	var cost = SeasonManager.WATER_COST_BASE
-	if DifficultyManager.is_summer_drought() and turn >= SeasonManager.DROUGHT_FIRST_TURN and turn <= SeasonManager.DROUGHT_LAST_TURN:
+	if DifficultyManager.is_drought_turn(turn):
 		cost += 1
 	return cost
 
