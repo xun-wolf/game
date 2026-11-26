@@ -1,21 +1,14 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://ui/MainUITheme.tres" type="Theme" id=1]
 [ext_resource path="res://Intro.gd" type="Script" id=2]
-[ext_resource path="res://ui/menu_bg.png" type="Texture" id=3]
-[ext_resource path="res://decor/tree_big.png" type="Texture" id=4]
-[ext_resource path="res://decor/tree_pine.png" type="Texture" id=5]
-[ext_resource path="res://decor/tuft_c.png" type="Texture" id=6]
-[ext_resource path="res://decor/stone.png" type="Texture" id=7]
-[ext_resource path="res://decor/pebble.png" type="Texture" id=8]
-[ext_resource path="res://tutorial/scroll.svg" type="Texture" id=9]
-[ext_resource path="res://cards/card1.svg" type="Texture" id=10]
-[ext_resource path="res://cards/card_seeds.svg" type="Texture" id=11]
-[ext_resource path="res://cards/card_water.svg" type="Texture" id=12]
-[ext_resource path="res://cards/card_attak.svg" type="Texture" id=13]
-[ext_resource path="res://cards/card_tank.svg" type="Texture" id=14]
-[ext_resource path="res://ui/title_cn.png" type="Texture" id=15]
-[ext_resource path="res://farm/farmland_1.png" type="Texture" id=16]
+[ext_resource path="res://tutorial/scroll.svg" type="Texture" id=3]
+[ext_resource path="res://cards/card_seeds.svg" type="Texture" id=5]
+[ext_resource path="res://cards/card_water.svg" type="Texture" id=6]
+[ext_resource path="res://cards/card_attak.svg" type="Texture" id=7]
+[ext_resource path="res://cards/card_tank.svg" type="Texture" id=8]
+[ext_resource path="res://ui/title_cn.png" type="Texture" id=9]
+[ext_resource path="res://decor/stone.png" type="Texture" id=10]
 
 [node name="Control" type="Control"]
 margin_right = 1080.0
@@ -24,126 +17,112 @@ mouse_filter = 2
 theme = ExtResource( 1 )
 script = ExtResource( 2 )
 
-[node name="Bg" type="TextureRect" parent="."]
+[node name="FrameBg" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="Bg" type="ColorRect" parent="FrameBg"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color( 0.1, 0.08, 0.06, 1 )
+
+[node name="Paper" type="TextureRect" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 expand = true
-stretch_mode = 6
-texture = ExtResource( 3 )
-modulate = Color( 0.62, 0.68, 0.78, 1 )
+stretch_mode = 1
 
 [node name="Stage" type="Node2D" parent="."]
 
-[node name="Soil1" type="Sprite" parent="Stage"]
-position = Vector2( 140, 690 )
-scale = Vector2( 2.2, 2.2 )
-modulate = Color( 0.5, 0.47, 0.42, 1 )
-texture = ExtResource( 16 )
+[node name="Sun" type="Sprite" parent="Stage"]
+position = Vector2( 870, 240 )
+modulate = Color( 0.25, 0.18, 0.12, 1 )
 
-[node name="Soil2" type="Sprite" parent="Stage"]
-position = Vector2( 420, 690 )
-scale = Vector2( 2.2, 2.2 )
-modulate = Color( 0.5, 0.47, 0.42, 1 )
-texture = ExtResource( 16 )
+[node name="Furrow4" type="Line2D" parent="Stage"]
+visible = false
+width = 3.0
+default_color = Color( 0.22, 0.15, 0.1, 0.16 )
+joint_mode = 2
+antialiased = true
 
-[node name="Soil3" type="Sprite" parent="Stage"]
-position = Vector2( 700, 690 )
-scale = Vector2( 2.2, 2.2 )
-modulate = Color( 0.5, 0.47, 0.42, 1 )
-texture = ExtResource( 16 )
+[node name="Furrow5" type="Line2D" parent="Stage"]
+visible = false
+width = 3.0
+default_color = Color( 0.22, 0.15, 0.1, 0.22 )
+joint_mode = 2
+antialiased = true
 
-[node name="Soil4" type="Sprite" parent="Stage"]
-position = Vector2( 980, 690 )
-scale = Vector2( 2.2, 2.2 )
-modulate = Color( 0.5, 0.47, 0.42, 1 )
-texture = ExtResource( 16 )
+[node name="Furrow1" type="Line2D" parent="Stage"]
+visible = false
+width = 4.0
+default_color = Color( 0.22, 0.15, 0.1, 0.85 )
+joint_mode = 2
+antialiased = true
 
-[node name="TreeBig" type="Sprite" parent="Stage"]
-position = Vector2( 120, 545 )
-scale = Vector2( 4, 4 )
-modulate = Color( 0.32, 0.37, 0.33, 1 )
-texture = ExtResource( 4 )
+[node name="Furrow2" type="Line2D" parent="Stage"]
+visible = false
+width = 4.0
+default_color = Color( 0.22, 0.15, 0.1, 0.8 )
+joint_mode = 2
+antialiased = true
 
-[node name="TreePine" type="Sprite" parent="Stage"]
-position = Vector2( 985, 610 )
-scale = Vector2( 4.5, 4.5 )
-modulate = Color( 0.27, 0.33, 0.29, 1 )
-texture = ExtResource( 5 )
-
-[node name="TuftA" type="Sprite" parent="Stage"]
-position = Vector2( 300, 700 )
-scale = Vector2( 5, 5 )
-modulate = Color( 0.42, 0.47, 0.4, 1 )
-texture = ExtResource( 6 )
-
-[node name="TuftB" type="Sprite" parent="Stage"]
-position = Vector2( 520, 712 )
-scale = Vector2( 4, 4 )
-modulate = Color( 0.38, 0.43, 0.36, 1 )
-texture = ExtResource( 6 )
-
-[node name="TuftC" type="Sprite" parent="Stage"]
-position = Vector2( 860, 700 )
-scale = Vector2( 5, 5 )
-modulate = Color( 0.42, 0.47, 0.4, 1 )
-texture = ExtResource( 6 )
+[node name="Furrow3" type="Line2D" parent="Stage"]
+visible = false
+width = 4.0
+default_color = Color( 0.22, 0.15, 0.1, 0.7 )
+joint_mode = 2
+antialiased = true
 
 [node name="Stone" type="Sprite" parent="Stage"]
-position = Vector2( 760, 620 )
+position = Vector2( 760, 600 )
 scale = Vector2( 8, 8 )
-modulate = Color( 0.62, 0.65, 0.7, 1 )
-texture = ExtResource( 7 )
-
-[node name="Pebble1" type="Sprite" parent="Stage"]
-position = Vector2( 690, 655 )
-scale = Vector2( 6, 6 )
-modulate = Color( 0.6, 0.62, 0.66, 1 )
-texture = ExtResource( 8 )
-
-[node name="Pebble2" type="Sprite" parent="Stage"]
-position = Vector2( 830, 662 )
-scale = Vector2( 5, 5 )
-modulate = Color( 0.6, 0.62, 0.66, 1 )
-texture = ExtResource( 8 )
+modulate = Color( 0.4, 0.34, 0.28, 1 )
+texture = ExtResource( 10 )
 
 [node name="Scroll" type="Sprite" parent="Stage"]
 visible = false
 position = Vector2( 540, 430 )
-scale = Vector2( 0.34, 0.02 )
-texture = ExtResource( 9 )
-
-[node name="Deck" type="Sprite" parent="Stage"]
-visible = false
-position = Vector2( 810, 500 )
-scale = Vector2( 0.14, 0.14 )
-texture = ExtResource( 10 )
+scale = Vector2( 0.32, 0.02 )
+texture = ExtResource( 3 )
 
 [node name="Card1" type="Sprite" parent="Stage"]
 visible = false
-position = Vector2( 300, 340 )
-scale = Vector2( 0.12, 0.12 )
-texture = ExtResource( 11 )
+position = Vector2( 540, 640 )
+scale = Vector2( 0.16, 0.16 )
+texture = ExtResource( 5 )
 
 [node name="Card2" type="Sprite" parent="Stage"]
 visible = false
-position = Vector2( 460, 340 )
-scale = Vector2( 0.12, 0.12 )
-texture = ExtResource( 12 )
+position = Vector2( 540, 640 )
+scale = Vector2( 0.16, 0.16 )
+texture = ExtResource( 6 )
 
 [node name="Card3" type="Sprite" parent="Stage"]
 visible = false
-position = Vector2( 620, 340 )
-scale = Vector2( 0.12, 0.12 )
-texture = ExtResource( 13 )
+position = Vector2( 540, 640 )
+scale = Vector2( 0.16, 0.16 )
+texture = ExtResource( 7 )
 
 [node name="Card4" type="Sprite" parent="Stage"]
 visible = false
-position = Vector2( 780, 340 )
-scale = Vector2( 0.12, 0.12 )
-texture = ExtResource( 14 )
+position = Vector2( 540, 640 )
+scale = Vector2( 0.16, 0.16 )
+texture = ExtResource( 8 )
 
 [node name="FX" type="Node2D" parent="."]
+
+[node name="PageFlash" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color( 1, 0.98, 0.92, 0 )
+
+[node name="DarkWash" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color( 0.04, 0.03, 0.02, 0 )
 
 [node name="SubtitleBg" type="ColorRect" parent="."]
 visible = false
@@ -152,7 +131,7 @@ margin_top = 688.0
 margin_right = 990.0
 margin_bottom = 754.0
 mouse_filter = 2
-color = Color( 0, 0, 0, 0.55 )
+color = Color( 0.96, 0.92, 0.84, 0.8 )
 
 [node name="Subtitle" type="Label" parent="."]
 modulate = Color( 1, 1, 1, 0 )
@@ -161,7 +140,7 @@ margin_top = 692.0
 margin_right = 980.0
 margin_bottom = 750.0
 mouse_filter = 2
-custom_colors/font_color = Color( 0.95, 0.92, 0.84, 1 )
+custom_colors/font_color = Color( 0.27, 0.19, 0.12, 1 )
 custom_font_sizes/font_size = 20
 text = "地荒了三年，草比人高。"
 align = 1
@@ -176,18 +155,7 @@ margin_right = 820.0
 margin_bottom = 502.0
 mouse_filter = 2
 rect_pivot_offset = Vector2( 280, 126 )
-texture = ExtResource( 15 )
-
-[node name="SkipHint" type="Label" parent="."]
-margin_left = 700.0
-margin_top = 760.0
-margin_right = 1050.0
-margin_bottom = 788.0
-mouse_filter = 2
-custom_colors/font_color = Color( 0.85, 0.83, 0.78, 0.9 )
-custom_font_sizes/font_size = 12
-text = "点击继续 · 长按跳过"
-align = 2
+texture = ExtResource( 9 )
 
 [node name="Dot1" type="ColorRect" parent="."]
 margin_left = 522.0
@@ -195,7 +163,7 @@ margin_top = 662.0
 margin_right = 530.0
 margin_bottom = 670.0
 mouse_filter = 2
-color = Color( 0.95, 0.85, 0.6, 1 )
+color = Color( 0.2, 0.14, 0.1, 0.9 )
 
 [node name="Dot2" type="ColorRect" parent="."]
 margin_left = 540.0
@@ -203,7 +171,7 @@ margin_top = 662.0
 margin_right = 548.0
 margin_bottom = 670.0
 mouse_filter = 2
-color = Color( 0.4, 0.38, 0.34, 0.7 )
+color = Color( 0.45, 0.36, 0.28, 0.45 )
 
 [node name="Dot3" type="ColorRect" parent="."]
 margin_left = 558.0
@@ -211,7 +179,7 @@ margin_top = 662.0
 margin_right = 566.0
 margin_bottom = 670.0
 mouse_filter = 2
-color = Color( 0.4, 0.38, 0.34, 0.7 )
+color = Color( 0.45, 0.36, 0.28, 0.45 )
 
 [node name="Dot4" type="ColorRect" parent="."]
 margin_left = 576.0
@@ -219,6 +187,17 @@ margin_top = 662.0
 margin_right = 584.0
 margin_bottom = 670.0
 mouse_filter = 2
-color = Color( 0.4, 0.38, 0.34, 0.7 )
+color = Color( 0.45, 0.36, 0.28, 0.45 )
+
+[node name="SkipHint" type="Label" parent="."]
+margin_left = 700.0
+margin_top = 760.0
+margin_right = 1050.0
+margin_bottom = 788.0
+mouse_filter = 2
+custom_colors/font_color = Color( 0.35, 0.27, 0.2, 0.9 )
+custom_font_sizes/font_size = 12
+text = "点击继续 · 长按跳过"
+align = 2
 
 [node name="Tween" type="Tween" parent="."]
