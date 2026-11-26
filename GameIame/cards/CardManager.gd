@@ -61,10 +61,13 @@ func compute_y(theta, o, s):
 func organize_cards(card_is_picked_up):
 	var center_card_height = 300.0
 	
-	var x_step = 200
-	var angle_step = deg2rad(4)
-	
+	# 牌越多，横向步长越小，避免超出屏幕；角度步长固定，保持扇形弧度
 	var num_cards = get_child_count()
+	var x_step = 200.0
+	if num_cards > 4:
+		x_step = min(200.0, 820.0 / float(num_cards - 1))
+	var angle_step = deg2rad(4.5)
+	
 	var start = -(num_cards - 1.0) / 2
 
 	if num_cards > 0:
@@ -73,8 +76,10 @@ func organize_cards(card_is_picked_up):
 		start += card_scroll_offset
 	
 	var y_base = -200#-260
+	var hover_base = y_base - 30.0
 	if card_is_picked_up:
 		y_base = 80
+		hover_base = 80
 	
 	for i in range(0, get_child_count()):
 		var c = get_child(i)
@@ -83,12 +88,12 @@ func organize_cards(card_is_picked_up):
 		var angle_offset = angle_step * (i + start)
 		
 		#var y_offset = abs(x_offset) * tan(abs(angle_offset))
-		var y_offset = compute_y(abs(angle_offset), abs(x_offset), 140)
+		var y_offset = compute_y(abs(angle_offset), abs(x_offset), 150)
 		
 		var hand_pos = Vector2(x_offset, y_base + y_offset)
 
 		c.in_hand_position = hand_pos
-		c.in_hand_hover_position = Vector2(hand_pos.x, y_base)
+		c.in_hand_hover_position = Vector2(hand_pos.x, hover_base)
 		c.in_hand_rotation = angle_offset
 	
 	

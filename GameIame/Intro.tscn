@@ -1,8 +1,16 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://ui/MainUITheme.tres" type="Theme" id=1]
 [ext_resource path="res://Intro.gd" type="Script" id=2]
 [ext_resource path="res://ButtonSFX.gd" type="Script" id=3]
+[ext_resource path="res://shaders/ink_wipe.shader" type="Shader" id=4]
+
+[sub_resource type="ShaderMaterial" id=6]
+shader = ExtResource( 4 )
+shader_param/ink_color = Color( 0.08, 0.06, 0.04, 1 )
+shader_param/progress = 1.0
+shader_param/softness = 0.16
+shader_param/noise_scale = Vector2( 7, 7 )
 
 [sub_resource type="Animation" id=5]
 resource_name = "Fourth"
@@ -231,6 +239,15 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 theme = ExtResource( 1 )
 script = ExtResource( 2 )
+
+[node name="InkOverlay" type="ColorRect" parent="."]
+material = SubResource( 6 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color( 1, 1, 1, 1 )
+
+[node name="Tween" type="Tween" parent="."]
 
 [node name="Guide" type="Label" parent="."]
 visible = false

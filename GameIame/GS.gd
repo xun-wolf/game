@@ -525,6 +525,9 @@ func add_card_to_hand(card: Card):
 	
 	h.add_child(b)
 	
+	# 发牌错峰：每张比前一张晚 0.05 秒飞入
+	h.spawn_delay = float(hand.get_child_count()) * 0.05
+	
 	hand.add_child(h)
 
 func _ready():
