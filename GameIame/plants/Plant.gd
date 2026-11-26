@@ -107,18 +107,21 @@ func _refresh_tooltip():
 	var remain = total - 1 - $Plant.frame
 	var tip = "已成熟，可收获"
 	if remain > 0:
+		var step = 2 if card_level == 4 else 1
+		var waterings = int(ceil(float(remain) / step))
 		var water = 0
-		for i in range(remain):
+		for i in range(waterings):
 			water += _water_cost_at_turn(GS.current_turn + i)
-		var mature_turn = GS.current_turn + remain - 1
-		if mature_turn > GS.max_turns:
-			tip = "还需 %d 次浇水 · 共需 %d 水\n年内无法成熟（每候足水也来不及）" % [remain, water]
+		var mature_turn = GS.current_turn + waterings - 1
+		# 成熟后要下一候才收获，因此收获候 = 成熟候 + 1
+		if mature_turn + 1 > GS.max_turns:
+			tip = "还需 %d 次浇水 · 共需 %d 水\n年内无法收获（成熟也赶不上收获）" % [waterings, water]
 		else:
 			var when = "第 %d 候" % mature_turn
 			var term = SeasonManager.get_turn_term(mature_turn)
 			if term != "时节":
 				when = "%s（第 %d 候）" % [term, mature_turn]
-			tip = "还需 %d 次浇水 · 共需 %d 水\n预计%s成熟（每候足水）" % [remain, water, when]
+			tip = "还需 %d 次浇水 · 共需 %d 水\n预计%s成熟，次候收获（每候足水）" % [waterings, water, when]
 	if tip != last_tip:
 		last_tip = tip
 		hover_area.hint_tooltip = tip
@@ -297,7 +300,10 @@ func popup_menu():
 		GS.popup_card_winner()
 	
 func upgrade_plant():
-	$Plant.frame += 1
+	# 金稻·神种每次浇水推进两个生长阶段
+	var total = _get_frames().get_frame_count("default")
+	var step = 2 if card_level == 4 else 1
+	$Plant.frame = min($Plant.frame + step, total - 1)
 	refresh_growth()
 	
 func turn_over():
