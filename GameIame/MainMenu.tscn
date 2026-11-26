@@ -64,7 +64,7 @@ anchor_right = 0.5
 margin_left = 70.0
 margin_top = 270.0
 margin_right = 430.0
-margin_bottom = 490.0
+margin_bottom = 520.0
 
 [node name="CheckBox" type="CheckBox" parent="Flags"]
 margin_left = 0.0
@@ -76,9 +76,9 @@ script = ExtResource( 7 )
 
 [node name="QuickIntroCheck" type="CheckBox" parent="Flags"]
 margin_left = 0.0
-margin_top = 162.0
+margin_top = 196.0
 margin_right = 330.0
-margin_bottom = 204.0
+margin_bottom = 238.0
 text = "回访时播放极简开场"
 script = ExtResource( 7 )
 item = 3
@@ -87,7 +87,7 @@ item = 3
 margin_left = 0.0
 margin_top = 46.0
 margin_right = 360.0
-margin_bottom = 156.0
+margin_bottom = 146.0
 script = ExtResource( 8 )
 
 [node name="PrevButton" type="Button" parent="Flags/DifficultySelector"]
@@ -118,16 +118,16 @@ script = ExtResource( 4 )
 margin_left = 0.0
 margin_top = 46.0
 margin_right = 340.0
-margin_bottom = 76.0
+margin_bottom = 110.0
 text = "岁赋 18 两 | 害虫温和，风调雨顺"
 align = 1
 autowrap = true
 
 [node name="StatusLabel" type="Label" parent="Flags/DifficultySelector"]
 margin_left = 0.0
-margin_top = 78.0
+margin_top = 114.0
 margin_right = 340.0
-margin_bottom = 104.0
+margin_bottom = 140.0
 text = "【待攻坚 · 耕耘挑战】"
 align = 1
 
