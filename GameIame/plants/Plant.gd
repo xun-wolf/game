@@ -107,10 +107,28 @@ func _refresh_tooltip():
 	var remain = total - 1 - $Plant.frame
 	var tip = "已成熟，可收获"
 	if remain > 0:
-		tip = "还需 %d 次浇水 · 共需 %d 水" % [remain, remain * SeasonManager.water_cost_per_stage()]
+		var water = 0
+		for i in range(remain):
+			water += _water_cost_at_turn(GS.current_turn + i)
+		var mature_turn = GS.current_turn + remain - 1
+		if mature_turn > GS.max_turns:
+			tip = "还需 %d 次浇水 · 共需 %d 水\n年内无法成熟（每候足水也来不及）" % [remain, water]
+		else:
+			var when = "第 %d 候" % mature_turn
+			var term = SeasonManager.get_turn_term(mature_turn)
+			if term != "时节":
+				when = "%s（第 %d 候）" % [term, mature_turn]
+			tip = "还需 %d 次浇水 · 共需 %d 水\n预计%s成熟（每候足水）" % [remain, water, when]
 	if tip != last_tip:
 		last_tip = tip
 		hover_area.hint_tooltip = tip
+
+# 按候推算单阶段耗水：大暑（第 10-12 候）在开启旱情的档位翻倍。
+func _water_cost_at_turn(turn):
+	var cost = SeasonManager.WATER_COST_BASE
+	if DifficultyManager.is_summer_drought() and turn >= SeasonManager.DROUGHT_FIRST_TURN and turn <= SeasonManager.DROUGHT_LAST_TURN:
+		cost += 1
+	return cost
 
 func _start_mature_glow():
 	if mature_tween != null:
