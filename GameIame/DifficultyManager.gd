@@ -58,7 +58,8 @@ const TIER_DATA = {
 		"max_turns": 24,
 		"start_bug_wave": 12,
 		"summer_drought": true,
-		"desc": "岁赋 24 两 | 凶虫袭扰 + 大旱：大暑前后（第 10-12 候）每阶段 2 点水",
+		"start_gold": 6,
+		"desc": "岁赋 24 两 | 凶虫袭扰 + 大旱：大暑前后（第 10-12 候）每阶段 2 点水；乡邻接济，开局多 6 两",
 		"win_praise": "抗旱排难，善构水利，挽救田庄于绝境！"
 	},
 	Tier.TIER_5: {
@@ -121,7 +122,8 @@ func get_tier_desc(t: int = -1) -> String:
 	var key = current_tier if t == -1 else t
 	return TIER_DATA[key]["desc"]
 
-# 开局补偿：一品·神农绝境 多一点起始存银（"乡邻接济"）
+# 开局补偿：三品·百年大旱 / 一品·神农绝境 有乡邻接济的起始存银
+# 这笔钱主要用来在开局购买能量强化，撑过虫害与大旱
 func get_start_gold(t: int = -1) -> int:
 	var key = current_tier if t == -1 else t
 	return int(TIER_DATA[key].get("start_gold", 0))

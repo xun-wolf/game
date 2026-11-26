@@ -9,11 +9,11 @@
 - 耗水：SeasonManager.water_cost_per_stage（1 / 2 / 3）
 - 牌组：Tutorial.tutorial_cards 的初始 8 张
 - 能量 3/回合、手牌 5
-- 岁赋：DifficultyManager.TIER_DATA
-- 商店：shop/Shop.tscn 的 7/10/13/8/4/9
+- 岁赋：DifficultyManager.TIER_DATA（含一品开局 6 两）
+- 商店：shop/Shop.tscn 的 6/10/15/8/4/9（三档能量可分别购买）
+- 虫害：五品起开局双虫；大旱只影响第 10-12 候
 
-未建模（会把结果往上抬）：虫子的移动/寻路、防御牌、自动浇水、
-商店的能量强化以外的间接收益、目标选择失误。
+未建模：虫子的移动/寻路、防御牌的实际站位、目标选择失误。
 
 用法: python balance_sim.py [局数]
 """
@@ -57,15 +57,22 @@ PLANT = {
 }
 
 TIERS = [
-    {"rank": "九品", "tax": 18, "bug_start": 0, "drought": False},
-    {"rank": "七品", "tax": 24, "bug_start": 0, "drought": False},
-    {"rank": "五品", "tax": 24, "bug_start": 12, "drought": False},
-    {"rank": "三品", "tax": 24, "bug_start": 12, "drought": True},
-    {"rank": "一品", "tax": 30, "bug_start": 12, "drought": True},
+    {"rank": "九品", "tax": 18, "bug_start": 0, "drought": False, "start_gold": 0},
+    {"rank": "七品", "tax": 24, "bug_start": 0, "drought": False, "start_gold": 0},
+    {"rank": "五品", "tax": 24, "bug_start": 2, "drought": False, "start_gold": 0},
+    {"rank": "三品", "tax": 24, "bug_start": 2, "drought": True, "start_gold": 6},
+    {"rank": "一品", "tax": 30, "bug_start": 2, "drought": True, "start_gold": 6},
 ]
 
-SHOP = [("能量+1", 7), ("能量+1", 10), ("能量+1", 13), ("农田+1", 8), ("抽牌+1", 9)]
-AUTO_WATER = ("自动浇水", 4)
+# (名称, 价格, 类型)；三档能量是独立商品，可分别购买
+SHOP = [
+    ("能量一档", 6, "energy"),
+    ("能量二档", 10, "energy"),
+    ("能量三档", 15, "energy"),
+    ("农田", 8, "farm"),
+    ("浇水壶", 4, "water"),
+    ("抽牌", 9, "draw"),
+]
 
 MAX_TURNS = 24
 BASE_ENERGY = 3
@@ -86,18 +93,20 @@ def season_of(turn):
 def water_cost(turn, tier):
     if season_of(turn) != "summer":
         return 1
-    return 2 if (tier["drought"] and turn >= 10) else 1
+    return 2 if (tier["drought"] and 10 <= turn <= 12) else 1
 
 
 class Game:
-    def __init__(self, tier, rng, skill=1.0):
+    def __init__(self, tier, rng, skill=1.0, buy_style="cautious"):
         self.tier = tier
         self.rng = rng
         self.skill = skill
-        self.gold = 0
+        self.buy_style = buy_style
+        self.gold = tier.get("start_gold", 0)
         self.energy_max = BASE_ENERGY
         self.hand_size = BASE_HAND
         self.plots_cap = BASE_PLOTS
+        self.auto_water = False
         self.deck = list(STARTER)
         self.discard = []
         self.hand = []
@@ -108,6 +117,9 @@ class Game:
         self.deaths = 0
         self.upgrades = []
         self.bug_wave_turns = []
+        self.no_bug_turns = 0
+        self.some_bug_turns = 0
+        self.wave_count = 0
 
     # ---- 牌堆 ----
     def draw(self, n):
@@ -142,7 +154,8 @@ class Game:
                 target["water"] = min(10, target["water"] + val)
         elif kind.startswith("plant"):
             if len(self.plants) < self.plots_cap:
-                self.plants.append({"kind": kind, "water": 0, "defense": 0,
+                self.plants.append({"kind": kind, "water": 1 if self.auto_water else 0,
+                                    "defense": 0,
                                     "steps_left": PLANT[kind]["steps"], "health": 3})
         elif kind == "defend":
             if self.plants:
@@ -185,7 +198,7 @@ class Game:
                 break
 
         # 1) 有余力再扩田（慢慢来，别一次种满）
-        cap = min(self.plots_cap, 1 + self.turn // 6)
+        cap = min(self.plots_cap, 1 + self.turn // 4)
         guard = 0
         while len(self.plants) < cap and guard < 10:
             guard += 1
@@ -288,37 +301,65 @@ class Game:
                     self.deaths += 1
                     self.plants.remove(victim)
 
+    def _apply_upgrade(self, kind):
+        if kind == "energy":
+            self.energy_max += 1
+        elif kind == "farm":
+            self.plots_cap += 1
+        elif kind == "draw":
+            self.hand_size += 1
+        elif kind == "water":
+            self.auto_water = True
+
     def maybe_buy(self):
-        reserve = self.tier["tax"] - self.gold
-        # 只在"买完还能交税"时考虑
-        if self.gold - self.tier["tax"] <= 0:
+        """buy_style:
+        none     —— 完全不买
+        cautious —— 只在买完仍留出半个税银时买
+        invest   —— 前 15 候攒够就买（能量优先）
+        """
+        if self.buy_style == "none":
             return
-        for name, price in SHOP:
+        for name, price, kind in SHOP:
             if name in self.upgrades:
                 continue
-            if self.gold - price >= self.tier["tax"] * 0.5 and self.gold >= price + 4:
-                self.gold -= price
-                self.upgrades.append(name)
-                if name.startswith("能量"):
-                    self.energy_max += 1
-                elif name.startswith("农田"):
-                    self.plots_cap += 1
-                elif name.startswith("抽牌"):
-                    self.hand_size += 1
-                return
+            if self.buy_style == "invest":
+                afford = self.gold >= price and self.turn <= 15
+            else:
+                afford = (self.gold - price >= self.tier["tax"] * 0.5
+                          and self.gold >= price + 4)
+            if not afford:
+                continue
+            self.gold -= price
+            self.upgrades.append(name)
+            self._apply_upgrade(kind)
+            return
 
     def maybe_spawn(self):
-        # 近似 GS.spawn_configs：第 4 回合起每 3 回合一波，血量随波数上涨，场上最多 5 只
-        if self.turn < 4 or (self.turn - 4) % 3 != 0:
+        """近似 GS.spawn_enemies：清完虫 3 候后来下一波，虫没清掉 12 候后来增援。
+        五品起开局先来一波双虫（对应 start_bug_wave=12）。"""
+        if self.bugs:
+            self.no_bug_turns = 0
+            self.some_bug_turns += 1
+        else:
+            self.no_bug_turns += 1
+            self.some_bug_turns = 0
+
+        if self.turn < 3:
             return
         if len(self.bugs) >= 5:
             return
-        wave = (self.turn - 4) // 3
-        count = min(2, 1 + wave // 4)
-        health = [2, 2, 3, 3, 5, 5, 9][min(wave, 6)]
+        opening = self.tier["bug_start"] > 0 and self.wave_count == 0
+        if not (opening or self.no_bug_turns >= 3 or self.some_bug_turns >= 12):
+            return
+
+        health = [2, 2, 3, 3, 5, 5, 9][min(self.wave_count, 6)]
+        count = 2 if opening else min(2, 1 + self.wave_count // 4)
         for _ in range(count):
             self.bugs.append({"health": health})
         self.bug_wave_turns.append(self.turn)
+        self.wave_count += 1
+        self.no_bug_turns = 0
+        self.some_bug_turns = 0
 
     def run(self):
         for t in range(1, MAX_TURNS + 1):
@@ -330,7 +371,7 @@ class Game:
         return self.gold
 
 
-def simulate(n_games=200, seed=1, skills=(0.6, 0.8, 1.0)):
+def simulate(n_games=200, seed=1, skills=(0.6, 0.8, 1.0), buy_style="cautious"):
     rng = random.Random(seed)
     out = {}
     for skill in skills:
@@ -338,7 +379,7 @@ def simulate(n_games=200, seed=1, skills=(0.6, 0.8, 1.0)):
         for tier in TIERS:
             golds, passes, harvests, deaths, ups = [], 0, [], [], []
             for _ in range(n_games):
-                g = Game(tier, rng, skill)
+                g = Game(tier, rng, skill, buy_style)
                 gold = g.run()
                 golds.append(gold)
                 harvests.append(g.harvests)

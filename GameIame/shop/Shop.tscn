@@ -141,7 +141,7 @@ margin_bottom = 128.0
 texture = ExtResource( 3 )
 script = ExtResource( 4 )
 description = "这枚神秘水晶能为你增加 1 点能量上限。"
-cost = 7
+cost = 6
 
 [node name="Button" type="Button" parent="Items/Shop1"]
 anchor_left = 0.5
@@ -183,7 +183,7 @@ margin_bottom = 128.0
 texture = ExtResource( 5 )
 script = ExtResource( 4 )
 description = "这枚附魔戒指能为你增加 1 点能量上限。"
-cost = 13
+cost = 15
 
 [node name="Button" type="Button" parent="Items/Shop3"]
 anchor_left = 0.5
