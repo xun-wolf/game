@@ -643,11 +643,12 @@ func add_card_to_hand(card: Card):
 	hand.add_child(h)
 
 func _ready():
-	# 用编辑器版引擎打包时窗口标题会带 "(DEBUG)"，这里统一覆盖成正式标题
-	OS.set_window_title("田间风云 · Field Chronicles")
-	# 窗口大小交给项目设置（1080x800）+ 项目里的 stretch 设置；
-	# 位置显式固定在左上角：高分屏下引擎默认居中的算法会把窗口推出屏幕底部。
-	OS.window_position = Vector2(30, 30)
+	# 用编辑器版引擎打包时窗口标题会带 "(DEBUG)"，这里统一覆盖成正式标题；
+	# Web 端没有窗口位置概念，跳过这两步。
+	if OS.get_name() != "HTML5":
+		OS.set_window_title("田间风云 · Field Chronicles")
+		# 位置显式固定在左上角：高分屏下引擎默认居中的算法会把窗口推出屏幕底部。
+		OS.window_position = Vector2(30, 30)
 	
 	reset_all_state()
 
